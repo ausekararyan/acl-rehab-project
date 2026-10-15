@@ -1,0 +1,2602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RePitch - ACL Rehab Portal</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- MediaPipe Pose API -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js" crossorigin="anonymous"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        darkBg: '#0b0f19',
+                        darkCard: '#1a2235',
+                        'emerald-500': '#10b981',
+                        'blue-500': '#3b82f6',
+                        'amber-500': '#fbbf24',
+                        'rose-500': '#ef4444',
+                        grayText: '#9ca3af'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        urbanist: ['Urbanist', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Urbanist:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* Light Theme Overrides (VALID CSS) */
+        body.light-theme { background-color: #f3f4f6 !important; color: #111827 !important; }
+        body.light-theme .bg-slate-950 { background-color: #f3f4f6 !important; }
+        body.light-theme .bg-slate-900 { background-color: #ffffff !important; }
+        body.light-theme .bg-slate-900\/80 { background-color: rgba(255,255,255,0.9) !important; }
+        body.light-theme .bg-slate-800 { background-color: #f9fafb !important; }
+        body.light-theme .bg-slate-700 { background-color: #e5e7eb !important; }
+        body.light-theme .border-slate-800 { border-color: #e5e7eb !important; }
+        body.light-theme .border-slate-700 { border-color: #d1d5db !important; }
+        
+        body.light-theme .text-white { color: #111827 !important; }
+        body.light-theme .hover\:text-white:hover { color: #111827 !important; }
+        
+        body.light-theme .bg-slate-700 { background-color: #e5e7eb !important; }
+        body.light-theme .hover\:bg-slate-700:hover { background-color: #e5e7eb !important; }
+        
+        body.light-theme .bg-slate-800 { background-color: #f9fafb !important; }
+        body.light-theme .hover\:bg-slate-800:hover { background-color: #f9fafb !important; }
+        
+        body.light-theme .border-slate-800 { border-color: #e5e7eb !important; }
+        body.light-theme .hover\:border-slate-800:hover { border-color: #e5e7eb !important; }
+        
+        body.light-theme .border-slate-700 { border-color: #d1d5db !important; }
+        body.light-theme .hover\:border-slate-700:hover { border-color: #d1d5db !important; }
+        /* Preserve brightly colored buttons text */
+        body.light-theme .bg-indigo-600.text-white { color: #ffffff !important; }
+        body.light-theme .bg-emerald-500.text-white { color: #ffffff !important; }
+        body.light-theme .bg-rose-500.text-white { color: #ffffff !important; }
+        
+        body.light-theme .text-slate-400 { color: #6b7280 !important; }
+        body.light-theme .text-slate-300 { color: #4b5563 !important; }
+        body.light-theme .text-slate-500 { color: #9ca3af !important; }
+        
+        body.light-theme .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025) !important; }
+        body.light-theme .shadow-2xl { box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1) !important; }
+
+        body { background-color: #0b0f19; color: #f3f4f6; }
+        .hidden { display: none !important; }
+        ::-webkit-scrollbar { width: 8px; }
+        body.light-theme ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-track { background: #0b0f19; }
+        body.light-theme ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #1f2937; border-radius: 4px; }
+        body.light-theme ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        ::-webkit-scrollbar-thumb:hover { background: #374151; }
+    </style>
+</head>
+<body class="font-sans antialiased min-h-screen flex flex-col">
+
+    <!-- LOGIN VIEW -->
+    <div id="loginView" class="min-h-screen flex flex-col items-center justify-center p-4 bg-slate-950 relative transition-colors duration-500">
+        
+        <!-- Theme Toggle Switch for Login Page -->
+        <div class="absolute top-6 right-6 flex items-center bg-slate-800 p-2 rounded-full border border-slate-800 shadow-md">
+            <i class="fa-solid fa-moon text-indigo-400 mr-2 text-sm theme-icon-dark opacity-100 transition-opacity"></i>
+            <button onclick="toggleTheme()" class="w-12 h-6 bg-slate-700 rounded-full relative transition-colors duration-300 focus:outline-none border border-slate-700" id="loginThemeSwitchBtn">
+                <div class="w-4 h-4 bg-slate-900 rounded-full absolute top-[3px] left-1 transition-transform duration-300 shadow-md" id="loginThemeSwitchNub"></div>
+            </button>
+            <i class="fa-solid fa-sun text-yellow-500 ml-2 text-sm theme-icon-light opacity-30 transition-opacity"></i>
+        </div>
+
+        <div class="text-center mb-10 fade-in-up">
+            <img src="logo_transparent.png" alt="RePitch Logo" class="h-24 w-auto mx-auto mb-6 drop-shadow-2xl hover:scale-105 transition-transform duration-500">
+            <h1 class="text-5xl font-sans tracking-tight font-bold text-white tracking-tight mb-3">RePitch</h1>
+            <p class="text-slate-500 text-lg max-w-md mx-auto">Your intelligent companion for ACL rehabilitation and sports physiotherapy.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-3xl fade-in-up delay-100">
+            
+            <!-- Player Login Card -->
+            <div class="group bg-slate-900/80 backdrop-blur-sm border border-slate-800 border border-slate-800 hover:border-blue-500 rounded-3xl p-8 text-left transition-all duration-300 relative overflow-hidden flex flex-col">
+                <div class="absolute -right-6 -top-6 w-32 h-32 bg-indigo-600 rounded-full opacity-5 group-hover:scale-150 transition-transform duration-700"></div>
+                <div class="w-16 h-16 bg-indigo-600 bg-opacity-10 text-indigo-400 rounded-2xl flex items-center justify-center text-3xl mb-4 shadow-inner border border-blue-500 border-opacity-20 relative z-10">
+                    <i class="fa-solid fa-running"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-white mb-2 relative z-10">Player Portal</h2>
+                <p class="text-slate-500 text-sm mb-5 relative z-10">Access your daily rehab plan and live pose metrics.</p>
+                
+                <div class="relative z-10 mb-2">
+                    <input type="text" id="playerUsername" placeholder="User ID" value="player1" class="w-full bg-slate-800 border border-slate-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 transition-colors text-sm">
+                </div>
+                <div class="relative z-10 mb-6">
+                    <input type="password" id="playerPassword" placeholder="Password" value="rehab2026" class="w-full bg-slate-800 border border-slate-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 transition-colors text-sm">
+                </div>
+                
+                <button onclick="handleAuth('player')" class="relative z-10 w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-blue-500/30 active:scale-95 flex justify-center items-center">
+                    Login as Player <i class="fa-solid fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+
+            <!-- Physio Login Card -->
+            <div class="group bg-slate-900/80 backdrop-blur-sm border border-slate-800 border border-slate-800 hover:border-emerald-500 rounded-3xl p-8 text-left transition-all duration-300 relative overflow-hidden flex flex-col">
+                <div class="absolute -right-6 -top-6 w-32 h-32 bg-emerald-500 rounded-full opacity-5 group-hover:scale-150 transition-transform duration-700"></div>
+                <div class="w-16 h-16 bg-emerald-500 bg-opacity-10 text-emerald-500 rounded-2xl flex items-center justify-center text-3xl mb-4 shadow-inner border border-emerald-500 border-opacity-20 relative z-10">
+                    <i class="fa-solid fa-laptop-medical"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-white mb-2 relative z-10">Physio Portal</h2>
+                <p class="text-slate-500 text-sm mb-5 relative z-10">Monitor patient progress and adjust clinical angles.</p>
+                
+                <div class="relative z-10 mb-2">
+                    <input type="text" id="physioUsername" placeholder="User ID" value="doc_admin" class="w-full bg-slate-800 border border-slate-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500 transition-colors text-sm">
+                </div>
+                <div class="relative z-10 mb-6">
+                    <input type="password" id="physioPassword" placeholder="Password" value="physio2026" class="w-full bg-slate-800 border border-slate-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500 transition-colors text-sm">
+                </div>
+                
+                <button onclick="handleAuth('physio')" class="relative z-10 w-full bg-emerald-500 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-emerald-500/30 active:scale-95 flex justify-center items-center">
+                    Login as Physio <i class="fa-solid fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div class="mt-12 text-gray-600 text-sm font-medium">
+            &copy; 2026 RePitch Technologies
+        </div>
+    </div>
+
+    <!-- Navbar -->
+    <nav id="mainNav" class="bg-slate-900/80 backdrop-blur-sm border border-slate-800 border-b border-slate-800 p-4 sticky top-0 z-50 hidden">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <img src="logo_transparent.png" alt="RePitch Logo" class="h-8 w-auto drop-shadow-md">
+                <h1 class="text-xl font-sans tracking-tight font-bold text-white tracking-wide">RePitch</h1>
+            </div>
+            
+            <div class="flex items-center">
+                
+                
+                <!-- Trophy Badge (Player Only) -->
+                <div id="navTrophyBadge" class="flex items-center mr-4 bg-slate-800 px-4 py-1.5 rounded-lg border border-slate-700 shadow-sm transition-transform hover:scale-105 cursor-pointer" title="Football Trophies - Click to open store!" onclick="openRewards()">
+                    <div class="flex items-center text-yellow-500 font-bold">
+                        <i class="fa-solid fa-trophy text-lg mr-2"></i> 
+                        <span id="navTrophyCount">150</span>
+                    </div>
+                </div>
+                
+                <!-- Streak Badge (Player Only) -->
+                <div id="navStreakBadge" class="flex items-center mr-6 bg-slate-800 px-4 py-1.5 rounded-lg border border-slate-700 shadow-sm transition-transform hover:scale-105" title="Complete all daily exercises to extend your streak!">
+                    <div class="flex items-center text-orange-500 font-bold">
+                        <i class="fa-solid fa-fire text-lg mr-2 animate-pulse"></i> 
+                        <span id="navStreakCount">12</span>&nbsp;Day Streak
+                    </div>
+                </div>
+                
+                <!-- Theme Toggle Switch -->
+                <div class="flex items-center mr-6">
+                    <i class="fa-solid fa-moon text-indigo-400 mr-2 text-sm theme-icon-dark opacity-100 transition-opacity"></i>
+                    <button onclick="toggleTheme()" class="w-12 h-6 bg-slate-700 rounded-full relative transition-colors duration-300 focus:outline-none border border-slate-700" id="themeSwitchBtn">
+                        <div class="w-4 h-4 bg-slate-900 rounded-full absolute top-[3px] left-1 transition-transform duration-300 shadow-md" id="themeSwitchNub"></div>
+                    </button>
+                    <i class="fa-solid fa-sun text-yellow-500 ml-2 text-sm theme-icon-light opacity-30 transition-opacity"></i>
+                </div>
+                <div class="flex">
+                    <button onclick="logout()" class="px-5 py-2 rounded-lg text-sm font-bold bg-rose-500 bg-opacity-10 text-rose-500 hover:bg-opacity-20 border border-rose-500 border-opacity-30 transition-all flex items-center shadow-sm">
+                        <i class="fa-solid fa-arrow-right-from-bracket mr-2"></i> Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main id="mainAppContent" class="flex-grow max-w-7xl mx-auto w-full p-4 md:p-6 lg:p-8 hidden">
+        
+        <!-- Toast Notification -->
+        <div id="toast" class="fixed top-24 right-4 bg-emerald-500 text-white px-6 py-4 rounded-xl shadow-2xl transform transition-transform duration-300 translate-x-full z-50 flex items-center space-x-3 font-medium border border-emerald-500">
+            <i class="fa-solid fa-check-circle text-xl"></i>
+            <span id="toastMessage">Success!</span>
+        </div>
+
+        <!-- PLAYER VIEW -->
+        <div id="playerView" class="block">
+            <!-- Player Sub-nav -->
+            <div class="flex space-x-2 mb-6 border-b border-slate-800 pb-4">
+                <button id="tabDashboard" onclick="switchPlayerTab('dashboard')" class="bg-indigo-600 bg-opacity-20 text-indigo-400 border border-blue-500 px-4 py-2 rounded-lg font-bold text-sm transition-all"><i class="fa-solid fa-chart-line mr-2"></i>Today's Plan</button>
+                <button id="tabLibrary" onclick="switchPlayerTab('library')" class="bg-slate-800 text-slate-500 border border-slate-700 hover:text-white px-4 py-2 rounded-lg font-bold text-sm transition-all"><i class="fa-solid fa-book-medical mr-2"></i>Protocol Library</button>
+            </div>
+
+            <!-- Dashboard Section -->
+            <div id="playerDashboardSection" class="space-y-6 block">
+                <!-- ROO THE KANGAROO MASCOT WIDGET -->
+                <div class="bg-slate-900/80 backdrop-blur-sm border border-slate-800 rounded-2xl p-6 border border-slate-800 flex items-center shadow-lg relative overflow-hidden transition-all duration-300 hover:border-slate-700" id="rooWidget">
+                    <div class="w-32 h-32 flex-shrink-0 relative z-10 transition-transform duration-500" id="rooContainer">
+                        <img src=".user_uploaded/media_1787583769820.png" id="rooImage" class="w-full h-full object-contain drop-shadow-2xl transition-all duration-500">
+                    </div>
+                    <div class="ml-6 relative z-10 flex-grow">
+                        <div class="bg-slate-700 border border-slate-700 rounded-2xl p-4 relative shadow-xl">
+                            <!-- Speech Bubble Tail -->
+                            <div class="absolute w-4 h-4 bg-slate-700 border-l border-b border-slate-700 transform rotate-45 -left-2 top-1/2 -translate-y-1/2"></div>
+                            <h3 class="text-lg font-sans tracking-tight font-bold text-white flex items-center">
+                                <i class="fa-solid fa-check text-emerald-500 mr-2 hidden" id="rooCheck"></i> 
+                                <span id="rooSpeechTitle">Ready to work, Champ?</span>
+                            </h3>
+                            <p id="rooSpeechText" class="text-sm text-slate-500 mt-1">Let's knock out today's exercises. Protect that knee!</p>
+                            <button onclick="openRewards()" class="mt-4 bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-400 hover:to-yellow-500 text-gray-900 px-4 py-2 rounded-lg text-sm font-bold shadow-lg transition-all flex items-center transform hover:scale-105 inline-block">
+                                <i class="fa-solid fa-gift mr-2"></i> Rewards Store
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Background glowing effect -->
+                    <div class="absolute -right-20 -top-20 w-64 h-64 bg-indigo-600 opacity-5 rounded-full blur-3xl z-0 pointer-events-none"></div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Status Card -->
+                    <div class="bg-slate-900/80 backdrop-blur-sm border border-slate-800 rounded-xl p-6 border border-slate-800 shadow-lg col-span-1 md:col-span-2 relative overflow-hidden">
+                        <div class="absolute -right-10 -top-10 opacity-5 pointer-events-none">
+                            <i class="fa-solid fa-person-walking-arrow-right text-9xl"></i>
+                        </div>
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4 relative z-10">
+                            <div>
+                                <h2 class="text-2xl font-sans tracking-tight font-bold text-white mb-1">Today's Execution</h2>
+                                <p class="text-slate-500">Consistency is the cure. Follow the exact timings.</p>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <button onclick="startDailyRoutine()" class="bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2 rounded-full text-sm font-bold shadow-lg transition-transform hover:scale-105 flex items-center border border-emerald-400">
+                                    <i class="fa-solid fa-play mr-2"></i> Start Today's Routine
+                                </button>
+                                <div id="playerPhaseBadge" class="bg-indigo-600 bg-opacity-20 text-indigo-400 px-4 py-1.5 rounded-full text-sm font-bold border border-blue-500 flex items-center">
+                                    Phase 1
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4 mt-8 relative z-10">
+                            <div class="flex justify-between text-sm mb-2">
+                                <span class="text-slate-500 font-bold uppercase tracking-wider">Session Progress</span>
+                                <span id="dailyProgressText" class="text-white font-bold">0%</span>
+                            </div>
+                            <div class="w-full bg-slate-800 rounded-full h-4 border border-slate-700 p-0.5">
+                                <div id="dailyProgressBar" class="bg-gradient-to-r from-emerald-600 to-emerald-400 h-full rounded-full transition-all duration-700 ease-out shadow-sm" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-slate-800 rounded-lg p-4 mt-6 border border-slate-800 relative z-10">
+                            <h3 class="text-xs font-bold text-slate-500 mb-3 uppercase tracking-wider"><i class="fa-solid fa-dumbbell mr-2"></i>Equipment Needed Today</h3>
+                            <div id="equipmentList" class="flex flex-wrap gap-2 text-sm text-slate-300">
+                                <!-- Populated by JS -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Daily Logger -->
+                    <div class="bg-slate-900/80 backdrop-blur-sm border border-slate-800 rounded-xl p-6 border border-slate-800 shadow-lg flex flex-col justify-between">
+                        <div>
+                            <h2 class="text-lg font-sans tracking-tight font-bold text-white mb-4"><i class="fa-solid fa-heart-pulse text-rose-500 mr-2"></i>Daily Check-in</h2>
+                            
+                            <div class="space-y-5">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 mb-2 uppercase">Knee Pain Level (0-10)</label>
+                                    <div class="flex items-center space-x-3 bg-slate-800 p-3 rounded-lg border border-slate-800">
+                                        <span class="text-emerald-500 font-bold text-xs">0</span>
+                                        <input type="range" id="painSlider" min="0" max="10" value="0" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer" oninput="updatePainColor()">
+                                        <span class="text-rose-500 font-bold text-xs">10</span>
+                                    </div>
+                                    <div class="text-center mt-2"><span id="painValue" class="text-emerald-500 font-bold text-3xl font-mono">0</span></div>
+                                </div>
+                                
+                                
+                            </div>
+                        </div>
+                        
+                        <button onclick="submitDailyLog()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-3 rounded-lg transition-all font-bold text-sm mt-6 flex justify-center items-center shadow-lg shadow-blue-500/20 active:scale-95">
+                            <i class="fa-solid fa-cloud-arrow-up mr-2"></i> Submit Log
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Exercises List -->
+                <div class="mt-8">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-xl font-sans tracking-tight font-bold text-white"><i class="fa-solid fa-list-check text-indigo-400 mr-2"></i>Prescribed Exercises</h2>
+                        <span class="text-sm text-slate-500 font-bold bg-slate-800 px-3 py-1 rounded-full border border-slate-800" id="exerciseCount">0 Exercises</span>
+                    </div>
+                    <div id="exerciseContainer" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Cards populated by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Library Section (Hidden by default) -->
+            <div id="playerLibrarySection" class="hidden space-y-6">
+                <div class="bg-slate-900/80 backdrop-blur-sm border border-slate-800 rounded-xl p-6 border border-slate-800 shadow-lg">
+                    <h2 class="text-2xl font-sans tracking-tight font-bold text-white mb-2"><i class="fa-solid fa-book-open-reader text-indigo-400 mr-2"></i>Full Protocol Library</h2>
+                    <p class="text-slate-500 mb-6">Inspect the exercises for all phases of your ACL rehabilitation journey.</p>
+                    
+                    <!-- Phase tabs for library -->
+                    <div class="flex overflow-x-auto space-x-2 pb-2 mb-6">
+                        <button class="lib-tab bg-indigo-600 text-white px-4 py-2 rounded font-bold text-sm" data-libphase="1" onclick="renderLibrary(1)">Phase 1 (Wk 0-2)</button>
+                        <button class="lib-tab bg-slate-800 text-slate-500 hover:text-white border border-slate-700 px-4 py-2 rounded font-bold text-sm" data-libphase="2" onclick="renderLibrary(2)">Phase 2 (Wk 2-8)</button>
+                        <button class="lib-tab bg-slate-800 text-slate-500 hover:text-white border border-slate-700 px-4 py-2 rounded font-bold text-sm" data-libphase="3" onclick="renderLibrary(3)">Phase 3 (Mo 2-5)</button>
+                        <button class="lib-tab bg-slate-800 text-slate-500 hover:text-white border border-slate-700 px-4 py-2 rounded font-bold text-sm" data-libphase="4" onclick="renderLibrary(4)">Phase 4 (RTP)</button>
+                    </div>
+
+                    <div id="libraryContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PHYSIO VIEW -->
+        <div id="physioView" class="hidden space-y-6">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 gap-4 border-b border-slate-800 pb-6">
+                <div>
+                    <h2 class="text-3xl font-sans tracking-tight font-bold text-white mb-2"><i class="fa-solid fa-laptop-medical text-indigo-400 mr-3"></i>Physio Dashboard</h2>
+                    <p class="text-slate-500 mb-4">Monitor patient metrics and dynamically adapt protocols.</p>
+                    <button onclick="viewAllPatients()" class="bg-slate-700 hover:bg-slate-700 text-white px-4 py-2 rounded-lg text-sm font-bold border border-slate-700 transition-colors flex items-center shadow-md transform hover:scale-105 inline-flex">
+                        <i class="fa-solid fa-users mr-2"></i> View All Patients (<span id="totalPatientCount">4</span>)
+                    </button>
+                </div>
+                <div class="flex flex-col space-y-3 relative w-full md:w-96">
+                    <!-- Search Bar -->
+                    <div class="flex items-center bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 shadow-inner focus-within:border-blue-500 transition-colors">
+                        <i class="fa-solid fa-magnifying-glass text-slate-500 mr-2 text-sm"></i>
+                        <input type="text" id="patientSearchInput" onkeyup="filterPatients()" placeholder="Search patients..." class="w-full bg-transparent border-none text-white text-sm focus:outline-none placeholder-gray-600">
+                    </div>
+                    <!-- Search Results Dropdown -->
+                    <div id="patientSearchResults" class="hidden absolute top-10 left-0 w-full bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-50 max-h-48 overflow-y-auto">
+                        <!-- Populated by JS -->
+                    </div>
+
+                    <!-- Active Patient Profile -->
+                    <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex items-center space-x-4 shadow-inner">
+                        <div id="activePatientInitials" class="w-14 h-14 bg-indigo-600 text-white rounded-full flex items-center justify-center font-bold text-2xl border-2 border-white">AL</div>
+                        <div>
+                            <div class="text-xs text-slate-500 font-bold uppercase tracking-wider mb-1">Active Patient</div>
+                            <div id="activePatientName" class="text-lg font-bold text-white leading-none mb-1">Alex (Amateur Winger)</div>
+                            <div id="activePatientStats" class="text-xs font-bold text-emerald-500"><i class="fa-regular fa-calendar-check mr-1"></i>14 Days Post-Op (Graft: Patellar)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- ROM Progress -->
+                <div class="bg-slate-900/80 backdrop-blur-sm border border-slate-800 rounded-xl p-6 border border-slate-800 shadow-lg flex flex-col items-center justify-center relative overflow-hidden">
+                    <h3 class="text-slate-500 font-bold mb-4 uppercase tracking-wider text-xs"><i class="fa-solid fa-ruler-combined mr-2"></i>Range of Motion (ROM)</h3>
+                    <div class="relative w-48 h-24 overflow-hidden mb-2">
+                        <!-- Half circle gauge -->
+                        <svg viewBox="0 0 100 50" class="rom-chart w-full h-full absolute bottom-0">
+                            <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#1f2937" stroke-width="8" stroke-linecap="round"/>
+                            <path id="romFlexionArc" d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#3b82f6" stroke-width="8" stroke-dasharray="125" stroke-dashoffset="125" stroke-linecap="round" class="transition-all duration-1000"/>
+                        </svg>
+                    </div>
+                    <div class="flex justify-between w-full px-4 mt-2 text-center">
+                        <div>
+                            <div class="text-xs text-slate-500">Extension</div>
+                            <div id="extDisplay" class="text-xl font-bold text-emerald-500 font-mono">0°</div>
+                        </div>
+                        <div>
+                            <div class="text-xs text-slate-500">Flexion</div>
+                            <div id="flexDisplay" class="text-xl font-bold text-indigo-400 font-mono">110°</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- LSI -->
+                <div class="bg-slate-900/80 backdrop-blur-sm border border-slate-800 rounded-xl p-6 border border-slate-800 shadow-lg flex flex-col items-center justify-center relative overflow-hidden">
+                    <div class="absolute -right-4 -bottom-4 opacity-5 pointer-events-none">
+                        <i class="fa-solid fa-weight-scale text-9xl"></i>
+                    </div>
+                    <h3 class="text-slate-500 font-bold mb-2 uppercase tracking-wide text-xs"><i class="fa-solid fa-scale-balanced mr-2"></i>Limb Symmetry Index</h3>
+                    <div class="text-6xl font-sans tracking-tight font-bold text-amber-500 mt-4 drop-shadow-md">72<span class="text-3xl text-slate-500">%</span></div>
+                    <p class="text-xs text-slate-500 font-bold mt-4 bg-slate-800 px-4 py-1.5 rounded-full border border-slate-700">Goal: > 90%</p>
+                </div>
+
+                <!-- Red Flag Logs -->
+                <div class="bg-slate-900/80 backdrop-blur-sm border border-slate-800 rounded-xl p-6 border border-slate-800 shadow-lg col-span-1 flex flex-col">
+                    <h3 class="text-rose-500 font-bold mb-4 flex items-center text-xs uppercase tracking-wide"><i class="fa-solid fa-triangle-exclamation mr-2"></i>Symptom Alerts</h3>
+                    <div id="redFlagList" class="flex-grow space-y-3 overflow-y-auto max-h-40 pr-2">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+            
+
+            <!-- Urgent Triage Feed -->
+            <div class="bg-slate-900/80 backdrop-blur-sm border border-slate-800 rounded-xl p-6 border border-slate-800 shadow-lg mt-6 relative overflow-hidden" id="physioTriageFeedContainer" style="display:none;">
+                <div class="absolute -right-4 -top-4 w-24 h-24 bg-rose-500 rounded-full opacity-5"></div>
+                <h3 class="text-white font-bold text-lg flex items-center mb-4 relative z-10"><i class="fa-solid fa-triangle-exclamation text-rose-500 mr-3"></i>Urgent Triage Alerts</h3>
+                <div id="physioTriageFeed" class="space-y-4"></div>
+            </div>
+
+            <!-- Daily Video Submissions -->
+            <div class="bg-slate-900/80 backdrop-blur-sm border border-slate-800 rounded-xl p-6 border border-slate-800 shadow-lg mt-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-white font-bold text-lg flex items-center"><i class="fa-solid fa-video text-indigo-400 mr-3"></i>Patient Video Reports</h3>
+                </div>
+                <div id="physioSubmissionsFeed" class="space-y-4">
+                    <div class="text-slate-500 text-sm text-center py-4 italic font-bold">No recent video reports.</div>
+                </div>
+            </div>
+
+            <!-- Patient Daily Activity Log -->
+            <div class="bg-slate-900/80 backdrop-blur-sm border border-slate-800 rounded-xl p-6 border border-slate-800 shadow-lg mt-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-white font-bold text-lg flex items-center"><i class="fa-solid fa-list-check text-emerald-500 mr-3"></i>Daily Activity Log</h3>
+                    <span class="bg-emerald-500 bg-opacity-20 text-emerald-500 px-3 py-1 rounded-full text-xs font-bold border border-emerald-500 border-opacity-30">Today</span>
+                </div>
+                
+                <div class="bg-slate-800 rounded-lg border border-slate-800 p-4">
+                    <ul id="physioActivityLog" class="space-y-4 max-h-60 overflow-y-auto pr-2">
+                        <!-- Populated by JS -->
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Protocol Builder -->
+            <div class="bg-slate-900/80 backdrop-blur-sm border border-slate-800 rounded-xl p-6 border border-slate-800 shadow-lg mt-6">
+                <div class="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 gap-4">
+                    <h3 class="text-xl font-sans tracking-tight font-bold text-white"><i class="fa-solid fa-sliders mr-2 text-indigo-400"></i>Dynamic Protocol Builder</h3>
+                    <button onclick="saveProtocolChanges()" class="bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2.5 rounded-lg transition-all font-bold text-sm shadow-lg shadow-emerald-500/20 flex items-center active:scale-95">
+                        <i class="fa-solid fa-floppy-disk mr-2"></i> Push Updates to Player
+                    </button>
+                </div>
+                
+                <div class="mb-6 bg-slate-800 p-4 rounded-xl border border-slate-800">
+                    <label class="block text-xs font-bold text-slate-500 mb-3 uppercase tracking-wider">Assign Active Rehab Phase</label>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <button class="phase-btn bg-indigo-600 text-white border-blue-500 border-2 py-3 rounded-lg text-sm font-bold transition-all shadow-lg shadow-blue-500/20" data-phase="1" onclick="setPhase(1)">
+                            Phase 1<br><span class="text-xs font-medium opacity-80 mt-1 block">Protection (Wk 0-2)</span>
+                        </button>
+                        <button class="phase-btn bg-slate-900/80 backdrop-blur-sm border border-slate-800 text-slate-500 border-slate-700 border-2 hover:border-gray-500 py-3 rounded-lg text-sm font-bold transition-all" data-phase="2" onclick="setPhase(2)">
+                            Phase 2<br><span class="text-xs font-medium opacity-80 mt-1 block">Strength (Wk 2-8)</span>
+                        </button>
+                        <button class="phase-btn bg-slate-900/80 backdrop-blur-sm border border-slate-800 text-slate-500 border-slate-700 border-2 hover:border-gray-500 py-3 rounded-lg text-sm font-bold transition-all" data-phase="3" onclick="setPhase(3)">
+                            Phase 3<br><span class="text-xs font-medium opacity-80 mt-1 block">Running (Mo 2-5)</span>
+                        </button>
+                        <button class="phase-btn bg-slate-900/80 backdrop-blur-sm border border-slate-800 text-slate-500 border-slate-700 border-2 hover:border-gray-500 py-3 rounded-lg text-sm font-bold transition-all" data-phase="4" onclick="setPhase(4)">
+                            Phase 4<br><span class="text-xs font-medium opacity-80 mt-1 block">Return to Play</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="overflow-x-auto rounded-lg border border-slate-800 shadow-inner">
+                    <table class="w-full text-left border-collapse bg-slate-800">
+                        <thead class="bg-slate-700">
+                            <tr class="text-slate-500 text-xs uppercase tracking-wider">
+                                <th class="p-4 font-bold">Exercise & Instructions</th>
+                                <th class="p-4 font-bold text-center w-20">Sets</th>
+                                <th class="p-4 font-bold text-center w-20">Reps</th>
+                                <th class="p-4 font-bold text-center w-24">Hold (s)</th>
+                                <th class="p-4 font-bold w-48">Physio Notes</th>
+                                <th class="p-4 font-bold w-12 text-center">Act</th>
+                            </tr>
+                        </thead>
+                        <tbody id="physioExerciseTable" class="divide-y divide-slate-800">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- MediaPipe Pose-Matching Workout Engine -->
+    <div id="workoutModal" class="fixed inset-0 bg-slate-950 flex flex-col z-[100] hidden">
+        <!-- Top HUD -->
+        <div class="h-20 bg-slate-800 border-b border-slate-800 flex items-center justify-between px-6 shadow-md relative z-10">
+            <div class="flex items-center space-x-4">
+                <img src=".user_uploaded/media_1787583769820.png" id="modalRooImage" class="w-14 h-14 object-contain drop-shadow-md">
+                <div>
+                    <h2 id="modalExTitle" class="text-xl font-bold text-white leading-tight">Exercise Title</h2>
+                    <span id="modalRooSpeech" class="text-emerald-400 font-bold text-sm tracking-wide">"Ready to work? Let's check that knee angle!"</span>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-8">
+                <div class="text-center">
+                    <div class="text-xs text-slate-500 uppercase font-bold tracking-widest mb-1">Live Angle</div>
+                    <div id="hudLiveAngle" class="text-2xl font-bold text-white font-mono">--°</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-xs text-slate-500 uppercase font-bold tracking-widest mb-1">Set</div>
+                    <div id="wsSet" class="text-2xl font-bold text-white font-mono">1 <span class="text-sm text-gray-600">/ 3</span></div>
+                </div>
+                <div class="text-center bg-slate-700 border border-slate-700 px-6 py-2 rounded-xl shadow-inner">
+                    <div class="text-xs text-indigo-400 uppercase font-bold tracking-widest mb-1">Reps</div>
+                    <div id="wsRep" class="text-3xl font-bold text-white font-mono leading-none">0 <span class="text-base text-slate-500">/ 10</span></div>
+                </div>
+                <button onclick="abortWorkout()" class="bg-red-500 hover:bg-red-600 text-white w-10 h-10 rounded-full flex items-center justify-center transition-colors shadow-lg">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Split View Content -->
+        <div class="flex-1 flex flex-col md:flex-row overflow-hidden relative">
+            
+            <!-- Left Pane: Demo Reference -->
+            <div class="w-full md:w-1/2 bg-slate-800 flex flex-col items-center justify-center relative border-r border-slate-800 p-4">
+                <div class="absolute top-4 left-4 bg-slate-950 bg-opacity-70 px-3 py-1 rounded-lg text-xs font-bold text-slate-500 border border-slate-800 z-10 flex items-center">
+                    <i class="fa-brands fa-youtube text-red-500 mr-2 text-base"></i> REFERENCE DEMO
+                </div>
+                <div class="absolute top-4 right-4 bg-indigo-600 bg-opacity-20 px-3 py-1 rounded-lg text-xs font-bold text-indigo-400 border border-blue-500 border-opacity-30 z-10">
+                    Target: <span id="hudTargetAngle">175°</span>
+                </div>
+                
+                <div class="w-full aspect-video rounded-xl overflow-hidden shadow-2xl relative border border-slate-800 bg-slate-950">
+                    <iframe id="demoIframe" class="w-full h-full" src="" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                </div>
+                
+                <!-- Progress bar for rep hold -->
+                <div class="w-full max-w-lg mt-8 hidden" id="repProgressBarContainer">
+                    <div class="text-center text-xs font-bold text-emerald-400 uppercase tracking-widest mb-2" id="repProgressText">Hold Target Angle...</div>
+                    <div class="w-full bg-slate-800 rounded-full h-3 border border-slate-800 overflow-hidden shadow-inner">
+                        <div id="repProgressBar" class="bg-emerald-500 h-full transition-all duration-100 ease-linear shadow-[0_0_10px_rgba(16,185,129,0.8)]" style="width: 0%"></div>
+                    </div>
+                </div>
+                
+                <!-- Start Controls -->
+                <div id="startControlsContainer" class="mt-8 w-full max-w-sm">
+                    <button id="btnStartTimer" onclick="toggleWorkoutTimer()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-4 rounded-xl font-bold transition-all shadow-lg shadow-blue-500/30 text-lg flex justify-center items-center active:scale-95 mb-3 hidden">
+                        <i class="fa-solid fa-play mr-2"></i> Start Guided Set
+                    </button>
+                    <button id="btnStartTracking" onclick="startTracking()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-4 rounded-xl font-bold transition-all shadow-lg shadow-blue-500/30 text-lg flex justify-center items-center active:scale-95">
+                        <i class="fa-solid fa-camera mr-2"></i> Enable Camera & Start
+                    </button>
+                    
+                    <div id="recordingControls" class="hidden flex flex-wrap gap-2 mt-3 w-full">
+                        <button id="btnRecStart" onclick="startRecording()" class="flex-1 bg-rose-500 hover:bg-red-500 text-white py-3 rounded-xl font-bold text-sm shadow-lg shadow-red-500/30 transition-all flex justify-center items-center">
+                            <i class="fa-solid fa-circle mr-2 text-xs"></i> REC
+                        </button>
+                        <button id="btnRecPause" onclick="pauseRecording()" class="hidden flex-1 bg-amber-500 text-gray-900 py-3 rounded-xl font-bold text-sm shadow-lg transition-all flex justify-center items-center">
+                            <i class="fa-solid fa-pause mr-2"></i> Pause
+                        </button>
+                        <button id="btnRecResume" onclick="resumeRecording()" class="hidden flex-1 bg-amber-500 text-gray-900 py-3 rounded-xl font-bold text-sm shadow-lg transition-all flex justify-center items-center">
+                            <i class="fa-solid fa-play mr-2"></i> Resume
+                        </button>
+                        <button id="btnRecStop" onclick="stopRecording()" class="hidden flex-1 bg-slate-700 text-white py-3 rounded-xl font-bold text-sm shadow-lg transition-all flex justify-center items-center">
+                            <i class="fa-solid fa-stop mr-2"></i> Stop
+                        </button>
+                        <button id="btnRecRetake" onclick="retakeRecording()" class="hidden flex-1 bg-slate-700 text-white py-3 rounded-xl font-bold text-sm shadow-lg transition-all flex justify-center items-center">
+                            <i class="fa-solid fa-rotate-left mr-2"></i> Retake
+                        </button>
+                    </div>
+
+                    <button id="btnCompleteEx" onclick="completeWorkout()" class="mt-3 w-full bg-slate-700 hover:bg-slate-700 text-slate-500 py-3 rounded-xl font-bold border border-slate-700 transition-colors hidden text-sm">
+                        Force Complete (Skip Tracking)
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Right Pane: Live Webcam & Canvas Overlay -->
+            <div class="w-full md:w-1/2 bg-slate-950 relative flex items-center justify-center overflow-hidden">
+                <div class="absolute top-4 left-4 bg-slate-950 bg-opacity-70 px-3 py-1 rounded-lg text-xs font-bold text-slate-500 border border-slate-800 z-10 flex items-center">
+                    <i class="fa-solid fa-video text-emerald-500 mr-2"></i> LIVE POSE ENGINE
+                </div>
+
+                
+                <!-- Video Element (Hidden but feeds MediaPipe) -->
+                <video id="webcamVideo" class="hidden" autoplay playsinline></video>
+                
+                <!-- Canvas Element (Draws Video + Pose Overlay) -->
+                <canvas id="poseCanvas" class="max-w-full max-h-full object-contain"></canvas>
+                
+                <!-- Initial State Overlay -->
+                <div id="cameraLoadingOverlay" class="absolute inset-0 bg-slate-800 bg-opacity-90 flex flex-col items-center justify-center z-20">
+                    <i class="fa-solid fa-camera-retro text-6xl text-gray-700 mb-4"></i>
+                    <p class="text-slate-500 font-bold mb-2">Camera Inactive</p>
+                    <p class="text-gray-600 text-sm max-w-xs text-center">Click "Enable Camera & Start" to begin AI tracking.</p>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+<script>
+
+        window.playQuickAudit = async function(subIdx) {
+            let activePat = state.patients[state.activePatientId || 'alex_123'];
+            if(!activePat || !activePat.submissions) return;
+            const sub = activePat.submissions[subIdx];
+            if(!sub || !sub.clips) return;
+            showToast("Starting Quick Audit...", "success");
+            for(let i=0; i<sub.clips.length; i++) {
+                let vId = `physVid_${subIdx}_${i}`;
+                let v = document.getElementById(vId);
+                let ts = sub.clips[i].timestamps || {peak: 1};
+                if(v) {
+                    v.currentTime = ts.peak;
+                    try { await v.play(); } catch(e) {}
+                    await new Promise(r => setTimeout(r, 3000));
+                    v.pause();
+                }
+            }
+            showToast("Quick Audit Complete!", "success");
+        };
+        // Data structure
+        const phases = {
+            1: {
+                name: "Phase 1: Protection & Early Motion",
+                badgeColor: "blue-500",
+                equipment: ["Yoga Mat", "Towel"],
+                exercises: [
+                    { id: 'e1', title: "Quad Sets with Isometric Lock", sets: 1, reps: 1, hold: 5, trackingJoint: 'knee', startAngle: 150, targetAngle: 180, desc: ["Sit with leg straight", "Place rolled towel under ankle", "Squeeze thigh muscle tightly"], warning: "Don't lift heel off the towel.", svg: "quad", image: "exercise_quad_sets_1787543982867.jpg", videoId: "IF5eDfb8afM", vidStart: 18, vidEnd: 23 },
+                    { id: 'e2', title: "Straight Leg Raise (SLR)", sets: 1, reps: 1, hold: 3, trackingJoint: 'hip', startAngle: 180, targetAngle: 135, desc: ["Lie on back, good knee bent", "Lock straight leg out", "Lift slowly to 45 degrees"], warning: "Avoid knee lag (bending) while lifting.", svg: "slr", image: "exercise_slr_1787543996071.jpg", videoId: "zo2pqw794B0", vidStart: 25, vidEnd: 30 },
+                    { id: 'e3', title: "Heel Slides", sets: 1, reps: 1, hold: 3, trackingJoint: 'knee', startAngle: 170, targetAngle: 110, desc: ["Lie on back, legs straight", "Slowly slide heel towards glutes", "Hold gently at max comfortable bend"], warning: "Do not push past sharp pain.", svg: "heel", image: "exercise_heel_slides_1787544005962.jpg", videoId: "43rU4aUejhM", vidStart: 12, vidEnd: 17 },
+                    { id: 'e4', title: "Patellar Mobilizations", sets: 1, reps: 1, hold: 60, trackingJoint: 'knee', startAngle: 170, targetAngle: 180, desc: ["Relax leg completely straight", "Use thumbs and index fingers", "Gently glide kneecap up, down, side-to-side"], warning: "Leg must be relaxed; do not force against tension.", svg: "knee", image: "exercise_knee_mob_1787544028496.jpg", videoId: "b25Cds8r-WU", vidStart: 45, vidEnd: 50 }
+                ]
+            },
+            2: {
+                name: "Phase 2: Strength & Load Building",
+                badgeColor: "emerald-500",
+                equipment: ["Resistance Band", "10cm Step Box"],
+                exercises: [
+                    { id: 'e5', title: "Terminal Knee Extension (TKE)", sets: 1, reps: 1, hold: 3, trackingJoint: 'knee', startAngle: 150, targetAngle: 180, desc: ["Anchor band to heavy object", "Loop around back of knee", "Straighten leg against resistance"], warning: "Don't let the band snap your knee back.", svg: "tke", videoId: "CU7Fn11YMTw", vidStart: 35, vidEnd: 40 },
+                    { id: 'e6', title: "Mini Squats (0–60°)", sets: 1, reps: 1, hold: 2, trackingJoint: 'knee', startAngle: 180, targetAngle: 120, desc: ["Feet shoulder width apart", "Hinge hips back slightly", "Squat shallowly"], warning: "Keep knees aligned over second toe.", svg: "squat", videoId: "zNLi0_OpAj8", vidStart: 20, vidEnd: 25 },
+                    { id: 'e7', title: "Step-Ups", sets: 1, reps: 1, hold: 1, trackingJoint: 'knee', startAngle: 90, targetAngle: 180, desc: ["Stand facing 10cm box", "Step up with operative leg", "Control the descent slowly"], warning: "Do not push off heavily with trailing leg.", svg: "step" , videoId: "P9gOoqgHpEE", vidStart: 15, vidEnd: 20 },
+                    { id: 'e8', title: "Single-Leg Balance", sets: 1, reps: 1, hold: 30, trackingJoint: 'knee', startAngle: 180, targetAngle: 165, desc: ["Stand on foam pad", "Balance on operative leg", "Keep knee slightly bent"], warning: "Don't lock knee out completely.", svg: "balance", videoId: "Rt5byG2p_p0", vidStart: 12, vidEnd: 17 }
+                ]
+            },
+            3: {
+                name: "Phase 3: Running, Plyometrics & Agility",
+                badgeColor: "amber-500",
+                equipment: ["Agility Ladder", "Cones", "20cm Box"],
+                exercises: [
+                    { id: 'e9', title: "Straight-Line Interval Jogging", sets: 1, reps: 1, hold: 60, trackingJoint: 'knee', startAngle: 180, targetAngle: 160, desc: ["Jog at 60% pace", "Walk to recover", "Focus on symmetrical stride"], warning: "Stop if limp develops.", svg: "run" , videoId: "hT9ifUu_dBc", vidStart: 40, vidEnd: 45 },
+                    { id: 'e10', title: "Lateral Ladder Shuffles", sets: 1, reps: 1, hold: 30, trackingJoint: 'knee', startAngle: 180, targetAngle: 140, desc: ["Stay low in athletic stance", "Shuffle side-to-side quickly", "Do not cross feet"], warning: "Avoid valgus (knee collapsing inward).", svg: "agility" , videoId: "qzrDnjnk6N8", vidStart: 22, vidEnd: 27 },
+                    { id: 'e11', title: "Y-Balance Star Reach", sets: 1, reps: 1, hold: 2, trackingJoint: 'knee', startAngle: 180, targetAngle: 130, desc: ["Stand on operative leg", "Reach non-operative foot in 3 directions", "Touch lightly, don't bear weight"], warning: "Maintain balance on stance leg.", svg: "balance" , videoId: "yjEV8WKkbCw", vidStart: 18, vidEnd: 23 },
+                    { id: 'e12', title: "Low Box Drop & Land", sets: 1, reps: 1, hold: 3, trackingJoint: 'knee', startAngle: 180, targetAngle: 120, desc: ["Drop from 20cm box", "Land on both feet simultaneously", "Stick landing in mini-squat"], warning: "Land softly ('like a ninja'), avoid stiff knees.", svg: "box" , videoId: "HzBG6PoN96M", vidStart: 15, vidEnd: 20 }
+                ]
+            },
+            4: {
+                name: "Phase 4: Sport-Specific & RTP",
+                badgeColor: "blue-500",
+                equipment: ["Football", "Cones"],
+                exercises: [
+                    { id: 'e13', title: "Multi-Directional 90° Cone Cuts", sets: 1, reps: 1, hold: 1, trackingJoint: 'knee', startAngle: 180, targetAngle: 135, desc: ["Sprint to cone", "Plant outside foot firmly", "Explode 90 degrees in new direction"], warning: "Ensure firm footing; avoid slippery surfaces.", svg: "cut", videoId: "sc94HnnhU8g", vidStart: 25, vidEnd: 30 },
+                    { id: 'e14', title: "Single-Leg Triple Hop Test", sets: 1, reps: 1, hold: 2, trackingJoint: 'knee', startAngle: 180, targetAngle: 135, desc: ["Stand on one leg", "Perform 3 consecutive forward hops", "Stick the final landing"], warning: "If you can't stick landing, decrease distance.", svg: "hop" , videoId: "VaRpjz-0A98", vidStart: 18, vidEnd: 23 },
+                    { id: 'e15', title: "Football Passing & Dribble", sets: 1, reps: 1, hold: 120, trackingJoint: 'knee', startAngle: 180, targetAngle: 160, desc: ["Non-contact drill", "Short passing against wall/partner", "Light dribbling around cones"], warning: "No tackling or unpredictable reactions yet.", svg: "ball" , videoId: "1EqdfqhclPQ", vidStart: 30, vidEnd: 35 },
+                    { id: 'e16', title: "Reactive Deceleration", sets: 1, reps: 1, hold: 2, trackingJoint: 'knee', startAngle: 180, targetAngle: 110, desc: ["Sprint 10m", "On cue, stop within 2 steps", "Drop hips to absorb force"], warning: "Don't lean too far forward when stopping.", svg: "stop" , videoId: "hc_2sgy_nx4", vidStart: 20, vidEnd: 25 }
+                ]
+            }
+        };
+
+        // Improved SVGs
+        const svgLibrary = {
+            quad: `<svg viewBox="0 0 100 100" class="w-full h-full text-indigo-400" fill="currentColor"><path d="M10,80 Q50,80 90,80" stroke="#4b5563" stroke-width="2" fill="none"/><path d="M15,65 Q50,75 80,65 L85,75 Q50,85 15,75 Z" fill="#3b82f6"/><ellipse cx="70" cy="78" rx="8" ry="4" fill="#10b981"/><circle cx="50" cy="65" r="4" fill="#fff"/></svg>`,
+            slr: `<svg viewBox="0 0 100 100" class="w-full h-full text-indigo-400" fill="currentColor"><path d="M10,80 L90,80" stroke="#4b5563" stroke-width="4" stroke-dasharray="4,4"/><path d="M20,80 L70,30 L75,40 L30,80 Z" fill="#3b82f6"/><path d="M40,55 A30,30 0 0 1 70,80" fill="none" stroke="#fbbf24" stroke-width="3"/><circle cx="70" cy="30" r="4" fill="#fff"/></svg>`,
+            heel: `<svg viewBox="0 0 100 100" class="w-full h-full text-indigo-400" fill="currentColor"><path d="M10,80 L90,80" stroke="#4b5563" stroke-width="4"/><path d="M20,80 L40,40 L60,80 Z" fill="#3b82f6"/><path d="M75,70 L60,80" stroke="#ef4444" stroke-width="3" stroke-linecap="round"/><circle cx="40" cy="40" r="5" fill="#10b981"/><path d="M40,40 A30,30 0 0 1 60,80" fill="none" stroke="#fbbf24" stroke-width="3" stroke-dasharray="4,4"/></svg>`,
+            knee: `<svg viewBox="0 0 100 100" class="w-full h-full text-indigo-400" fill="none" stroke="currentColor" stroke-width="4"><circle cx="50" cy="50" r="25" stroke="#3b82f6"/><path d="M50,15 L50,5 M50,85 L50,95 M15,50 L5,50 M85,50 L95,50" stroke="#10b981" stroke-width="4" stroke-linecap="round"/><circle cx="50" cy="50" r="12" fill="#fbbf24" opacity="0.8"/></svg>`,
+            tke: `<svg viewBox="0 0 100 100" class="w-full h-full text-emerald-500" fill="none" stroke="currentColor" stroke-width="4"><path d="M30,90 L40,50 L30,10" stroke="#10b981" stroke-width="8" stroke-linecap="round"/><path d="M40,50 L90,50" stroke="#fbbf24" stroke-width="4" stroke-dasharray="5,5"/><circle cx="40" cy="50" r="5" fill="#fff"/></svg>`,
+            squat: `<svg viewBox="0 0 100 100" class="w-full h-full text-emerald-500" fill="none" stroke="currentColor" stroke-width="4"><path d="M40,90 L50,60 L20,40" stroke="#10b981" stroke-width="8" stroke-linecap="round"/><path d="M20,40 L40,10" stroke="#10b981" stroke-width="8" stroke-linecap="round"/><circle cx="50" cy="60" r="5" fill="#ef4444"/><path d="M40,90 L90,90" stroke="#4b5563" stroke-width="2"/></svg>`,
+            step: `<svg viewBox="0 0 100 100" class="w-full h-full text-emerald-500" fill="none" stroke="currentColor" stroke-width="4"><rect x="40" y="60" width="50" height="30" fill="#3b82f6" stroke="none"/><path d="M20,90 L30,60 L50,40" stroke="#10b981" stroke-width="8" stroke-linecap="round"/><path d="M60,60 L70,30 L90,10" stroke="#fbbf24" stroke-width="8" stroke-linecap="round" opacity="0.8"/></svg>`,
+            balance: `<svg viewBox="0 0 100 100" class="w-full h-full text-emerald-500" fill="none" stroke="currentColor" stroke-width="4"><rect x="30" y="80" width="40" height="10" rx="5" fill="#3b82f6" stroke="none"/><path d="M50,80 L50,40 L30,10" stroke="#10b981" stroke-width="8" stroke-linecap="round"/><circle cx="50" cy="40" r="5" fill="#fff"/></svg>`,
+            run: `<svg viewBox="0 0 100 100" class="w-full h-full text-amber-500" fill="none" stroke="currentColor" stroke-width="4"><path d="M40,90 L50,60 L30,40 L40,10" stroke="#fbbf24" stroke-width="8" stroke-linecap="round"/><path d="M60,80 L70,50 L50,30 L60,10" stroke="#3b82f6" stroke-width="8" stroke-linecap="round"/><path d="M20,30 L40,40 L60,30" stroke="#10b981" stroke-width="6" stroke-linecap="round"/></svg>`,
+            agility: `<svg viewBox="0 0 100 100" class="w-full h-full text-amber-500" fill="none" stroke="currentColor" stroke-width="4"><path d="M10,20 L90,20 M10,80 L90,80 M30,20 L30,80 M50,20 L50,80 M70,20 L70,80" stroke="#4b5563" stroke-width="2"/><path d="M20,50 Q40,20 60,50 T90,50" stroke="#fbbf24" stroke-width="4" stroke-dasharray="5,5"/></svg>`,
+            box: `<svg viewBox="0 0 100 100" class="w-full h-full text-amber-500" fill="none" stroke="currentColor" stroke-width="4"><rect x="10" y="60" width="30" height="30" fill="#3b82f6" stroke="none"/><path d="M25,50 Q50,10 75,70" stroke="#fbbf24" stroke-dasharray="5,5" stroke-width="3"/><path d="M75,90 L75,70 L60,50" stroke="#10b981" stroke-width="8" stroke-linecap="round"/><circle cx="75" cy="70" r="5" fill="#fff"/></svg>`,
+            cut: `<svg viewBox="0 0 100 100" class="w-full h-full text-indigo-400" fill="none" stroke="currentColor" stroke-width="4"><circle cx="20" cy="80" r="5" fill="#ef4444" stroke="none"/><circle cx="50" cy="20" r="5" fill="#10b981" stroke="none"/><circle cx="80" cy="80" r="5" fill="#fbbf24" stroke="none"/><path d="M20,70 L50,30 L80,70" stroke="#3b82f6" stroke-width="6" stroke-linecap="round" stroke-dasharray="6,6"/></svg>`,
+            hop: `<svg viewBox="0 0 100 100" class="w-full h-full text-indigo-400" fill="none" stroke="currentColor" stroke-width="4"><path d="M10,80 Q25,40 40,80 T70,80 T100,80" stroke="#3b82f6" stroke-width="4" stroke-dasharray="5,5"/><circle cx="40" cy="80" r="4" fill="#fbbf24" stroke="none"/><circle cx="70" cy="80" r="4" fill="#fbbf24" stroke="none"/></svg>`,
+            ball: `<svg viewBox="0 0 100 100" class="w-full h-full text-indigo-400" fill="none" stroke="currentColor" stroke-width="4"><circle cx="50" cy="50" r="30" stroke="#3b82f6" stroke-width="4"/><path d="M35,35 L65,65 M65,35 L35,65 M20,50 L80,50 M50,20 L50,80" stroke="#4b5563" stroke-width="2"/></svg>`,
+            stop: `<svg viewBox="0 0 100 100" class="w-full h-full text-indigo-400" fill="none" stroke="currentColor" stroke-width="4"><path d="M10,50 L60,50" stroke="#10b981" stroke-width="4" stroke-dasharray="8,4"/><path d="M70,90 L80,50 L60,30" stroke="#3b82f6" stroke-width="8" stroke-linecap="round"/><rect x="80" y="20" width="10" height="80" fill="#ef4444" stroke="none"/></svg>`
+        };
+        const defaultSvg = `<svg viewBox="0 0 100 100" class="w-full h-full text-slate-500" fill="none" stroke="currentColor" stroke-width="4"><circle cx="50" cy="50" r="30"/></svg>`;
+
+        // State
+        let state = {
+            currentPhase: 1,
+            completedExercises: [], 
+            protocolOverrides: {}, 
+            notes: {}, // { id: text }
+            deletedExercises: [], customExercises: {}, painLogs: [
+                { date: new Date(Date.now() - 86400000).toISOString(), pain: 2, ext: 2, flex: 95 }
+            ],
+            streak: 12,
+            streakCompletedToday: false,
+            
+            // Multi-Patient Mock Database
+            patients: {
+                'alex_123': {
+                    name: 'Alex Johnson', id: 'alex_123',
+                    submissions: [
+                        {
+                            id: 'demo_123_agentic',
+                            date: new Date().toLocaleDateString() + ' - Live Agentic Analysis',
+                            clips: [
+                                {
+                                    title: 'Quad Sets with Isometric Lock',
+                                    url: 'phase_1_combined.mp4',
+                                    timestamps: { start: 1, peak: 4, final: 8 }
+                                }
+                            ]
+                        }
+                    ],
+                    history: [
+                        { date: '08/08/2026', compliance: 90, pain: 3, extLag: 5, accuracy: 80 },
+                        { date: '08/09/2026', compliance: 90, pain: 3, extLag: 5, accuracy: 80 },
+                        { date: '08/10/2026', compliance: 90, pain: 3, extLag: 5, accuracy: 80 },
+                        { date: '08/11/2026', compliance: 90, pain: 3, extLag: 5, accuracy: 80 },
+                        { date: '08/12/2026', compliance: 90, pain: 3, extLag: 5, accuracy: 80 },
+                        { date: '08/13/2026', compliance: 90, pain: 3, extLag: 5, accuracy: 80 },
+                        { date: '08/14/2026', compliance: 90, pain: 3, extLag: 5, accuracy: 80 },
+                        { date: '08/15/2026', compliance: 90, pain: 3, extLag: 5, accuracy: 80 },
+                        { date: '08/16/2026', compliance: 90, pain: 3, extLag: 5, accuracy: 80 },
+                        { date: '08/17/2026', compliance: 90, pain: 3, extLag: 5, accuracy: 80 },
+                        { date: '08/18/2026', compliance: 90, pain: 3, extLag: 5, accuracy: 80 },
+                        { date: '08/19/2026', compliance: 90, pain: 3, extLag: 5, accuracy: 80 },
+                        { date: '08/20/2026', compliance: 90, pain: 3, extLag: 5, accuracy: 80 },
+                        { date: '08/21/2026', compliance: 90, pain: 3, extLag: 5, accuracy: 80 },
+                        { date: '08/22/2026', compliance: 90, pain: 3, extLag: 5, accuracy: 80 },
+                        { date: '08/23/2026', compliance: 90, pain: 7, extLag: 15, accuracy: 80 },
+                        { date: '08/24/2026', compliance: 90, pain: 7, extLag: 15, accuracy: 80 },
+                        { date: '08/25/2026', compliance: 90, pain: 7, extLag: 15, accuracy: 80 }
+                    ],
+                    submissions: [
+                        { id: 'sub_a1', date: '08/25/2026', clips: [ { title: 'Phase 1 Exercises (Combined)', url: 'phase_1_combined.mp4', timestamps: { start: 1, peak: 4, final: 8 } } ] }
+                    ]
+                },
+                'sarah_456': {
+                    name: 'Sarah Chen', id: 'sarah_456', submissions: [],
+                    history: [
+                        { date: '08/11/2026', compliance: 100, pain: 4, extLag: 8, accuracy: 80 },
+                        { date: '08/12/2026', compliance: 100, pain: 4, extLag: 8, accuracy: 81 },
+                        { date: '08/13/2026', compliance: 100, pain: 4, extLag: 7, accuracy: 82 },
+                        { date: '08/14/2026', compliance: 100, pain: 3, extLag: 7, accuracy: 83 },
+                        { date: '08/15/2026', compliance: 100, pain: 3, extLag: 6, accuracy: 84 },
+                        { date: '08/16/2026', compliance: 100, pain: 3, extLag: 6, accuracy: 85 },
+                        { date: '08/17/2026', compliance: 100, pain: 2, extLag: 5, accuracy: 86 },
+                        { date: '08/18/2026', compliance: 100, pain: 2, extLag: 5, accuracy: 87 },
+                        { date: '08/19/2026', compliance: 100, pain: 2, extLag: 4, accuracy: 88 },
+                        { date: '08/20/2026', compliance: 100, pain: 1, extLag: 4, accuracy: 89 },
+                        { date: '08/21/2026', compliance: 100, pain: 1, extLag: 3, accuracy: 90 },
+                        { date: '08/22/2026', compliance: 100, pain: 1, extLag: 3, accuracy: 91 },
+                        { date: '08/23/2026', compliance: 100, pain: 0, extLag: 2, accuracy: 92 },
+                        { date: '08/24/2026', compliance: 100, pain: 0, extLag: 2, accuracy: 93 },
+                        { date: '08/25/2026', compliance: 100, pain: 0, extLag: 1, accuracy: 94 }
+                    ],
+                    submissions: [
+                        { 
+                            id: 'sub_s1_agentic', 
+                            date: new Date().toLocaleDateString() + ' - Agentic Demo Report', 
+                            clips: [ 
+                                { 
+                                    title: 'Live Agentic Analysis (Demo)', 
+                                    url: 'phase_1_combined.mp4', 
+                                    timestamps: { start: 1, peak: 4, final: 8 } 
+                                } 
+                            ] 
+                        }
+                    ]
+                }
+            },
+            triageTickets: [],
+            dailySession: { clips: [], maxFlex: 0, maxExt: 180, totalTime: 0 },
+            mediaRecorder: null,
+            recordedChunks: [],
+            trophies: 150,
+            redeemed: []
+        };
+        
+        const rewardsCatalog = [
+            { id: 'r1', name: 'Football Stickers', price: 100, icon: 'fa-note-sticky', color: 'text-purple-400' },
+            { id: 'r2', name: 'Grip Stockings', price: 200, icon: 'fa-socks', color: 'text-blue-400' },
+            { id: 'r3', name: 'GK Gloves', price: 800, icon: 'fa-mitten', color: 'text-red-400' },
+            { id: 'r4', name: 'Pro Football', price: 1500, icon: 'fa-futbol', color: 'text-white' },
+            { id: 'r5', name: 'Agility Cones', price: 2000, icon: 'fa-triangle-exclamation', color: 'text-orange-500' },
+            { id: 'r6', name: 'Premium Studs', price: 5000, icon: 'fa-shoe-prints', color: 'text-emerald-400' }
+        ];
+
+        // Timing Constants (Seconds)
+        const TIMING = { LIFT: 2, DOWN: 2, RETURN: 2, REP_REST: 1, SET_REST: 20 };
+
+        // DOM
+        const playerView = document.getElementById('playerView');
+        const physioView = document.getElementById('physioView');
+        const playerDashboardSection = document.getElementById('playerDashboardSection');
+        const playerLibrarySection = document.getElementById('playerLibrarySection');
+        
+        let audioCtx = null;
+
+        
+        function playVideo(videoId, title) {
+            if(!videoId) return;
+            
+            // Find the exercise to get its specific start/end timestamps
+            let targetEx = null;
+            Object.values(phases).forEach(phase => {
+                const found = phase.exercises.find(e => e.videoId === videoId);
+                if (found) targetEx = found;
+            });
+
+            document.getElementById('videoModalTitle').innerText = title + " Demo";
+            
+            // Start midway into the video to skip the intro talking, trim to exactly 5 seconds.
+            const st = targetEx && targetEx.vidStart ? targetEx.vidStart : 20;
+            const en = targetEx && targetEx.vidEnd ? targetEx.vidEnd : 25;
+            
+            document.getElementById('videoIframe').src = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&start=${st}&end=${en}&loop=1&playlist=${videoId}`;
+            document.getElementById('videoModal').classList.remove('hidden');
+        }
+
+        function closeVideoModal() {
+            document.getElementById('videoIframe').src = "";
+            document.getElementById('videoModal').classList.add('hidden');
+        }
+
+        const rooIdleQuotes = [
+            "Ready to unlock that quad today, Champ? Let's get after Phase 2!",
+            "Remember: 10 clean reps today keeps the stiffness away. Tap an exercise to start!",
+            "Your knee feels strongest when you stay consistent. Let's work!"
+        ];
+        
+        const rooCompleteQuotes = [
+            "BOOM! Set crushed! That graft is getting stronger by the day!",
+            "Textbook execution! Your physio is going to love seeing this log.",
+            "Single-leg stability leveled up! Take a 45-second breath."
+        ];
+
+        function getRandomQuote(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+
+        function createConfetti() {
+            for (let i = 0; i < 40; i++) {
+                const conf = document.createElement('div');
+                conf.className = 'fixed w-3 h-3 rounded-sm z-[200] pointer-events-none';
+                conf.style.left = Math.random() * 100 + 'vw';
+                conf.style.top = '-10px';
+                conf.style.backgroundColor = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444'][Math.floor(Math.random() * 4)];
+                document.body.appendChild(conf);
+                
+                const anim = conf.animate([
+                    { transform: `translate3d(0,0,0) rotate(0deg)`, opacity: 1 },
+                    { transform: `translate3d(${Math.random()*100 - 50}px, 100vh, 0) rotate(${Math.random()*720}deg)`, opacity: 0 }
+                ], {
+                    duration: Math.random() * 2000 + 1500,
+                    easing: 'cubic-bezier(.37,0,.63,1)'
+                });
+                
+                anim.onfinish = () => conf.remove();
+            }
+        }
+
+        function updateRooState(stateType, contextEx = null) {
+            const rooImg = document.getElementById('rooImage');
+            const title = document.getElementById('rooSpeechTitle');
+            const text = document.getElementById('rooSpeechText');
+            const check = document.getElementById('rooCheck');
+            
+            const modalImg = document.getElementById('modalRooImage');
+            const modalSpeech = document.getElementById('modalRooSpeech');
+
+            if(!rooImg) return;
+
+            rooImg.className = "w-full h-full object-contain drop-shadow-2xl transition-all duration-500";
+            if(modalImg) modalImg.className = "w-12 h-12 object-contain mr-3 transition-transform duration-300";
+            check.classList.add('hidden');
+
+            let speechTitle = "";
+            let speechText = "";
+
+            if (stateType === 'active') {
+                rooImg.classList.add('scale-110');
+                if(modalImg) modalImg.classList.add('scale-110');
+                speechTitle = "Keep pushing!";
+                speechText = "Hold... 3, 2, 1... Great contraction! Breathe through it! Solid form!";
+            } else if (stateType === 'pain') {
+                rooImg.classList.add('grayscale', 'opacity-70', 'rotate-3');
+                speechTitle = "Don't skip today, champ!";
+                speechText = "Whoa, let's play it smart. High pain means we rest and let the inflammation drop.";
+            } else if (stateType === 'completed' || stateType === 'complete_exercise') {
+                check.classList.remove('hidden');
+                rooImg.classList.add('scale-105');
+                speechTitle = "Great Job!";
+                speechText = getRandomQuote(rooCompleteQuotes);
+                createConfetti();
+                
+                if (stateType === 'complete_exercise') {
+                    const exList = getActiveExercises(state.currentPhase);
+                    if (state.completedExercises.length !== exList.length) {
+                        setTimeout(() => updateRooState('default'), 5000);
+                    } else {
+                        speechTitle = "Session Complete!";
+                    }
+                } else {
+                    speechTitle = "Session Complete!";
+                }
+            } else if (stateType === 'modal_open') {
+                rooImg.classList.add('scale-105');
+                speechTitle = "Let's focus!";
+                if (contextEx && contextEx.title.includes('Quad Set')) {
+                    speechText = "Focus on squeezing that VMO tight for the full 10 seconds!";
+                } else if (contextEx && contextEx.title.includes('Heel Slide')) {
+                    speechText = "Smooth movements only! Don't force past sharp pain.";
+                } else if (contextEx && contextEx.title.includes('TKE')) {
+                    speechText = "Pop that knee back into full extension—lock it out!";
+                } else {
+                    speechText = "Focus on perfect form for this set. You got this!";
+                }
+            } else {
+                speechTitle = "Ready to work, Champ?";
+                speechText = getRandomQuote(rooIdleQuotes);
+            }
+
+            title.innerText = speechTitle;
+            text.innerText = speechText;
+            if(modalSpeech) {
+                modalSpeech.innerText = '"' + speechText + '"';
+            }
+        }
+
+        function toggleTheme() {
+            const isLight = document.body.classList.toggle('light-theme');
+            
+            const nub = document.getElementById('themeSwitchNub');
+            const switchBtn = document.getElementById('themeSwitchBtn');
+            const iconDark = document.querySelector('.theme-icon-dark');
+            const iconLight = document.querySelector('.theme-icon-light');
+
+            if (nub) {
+                if (isLight) {
+                    nub.style.transform = 'translateX(24px)';
+                    iconLight.classList.replace('opacity-30', 'opacity-100');
+                    iconDark.classList.replace('opacity-100', 'opacity-30');
+                    switchBtn.classList.replace('bg-slate-700', 'bg-indigo-600');
+                } else {
+                    nub.style.transform = 'translateX(0px)';
+                    iconLight.classList.replace('opacity-100', 'opacity-30');
+                    iconDark.classList.replace('opacity-30', 'opacity-100');
+                    switchBtn.classList.replace('bg-indigo-600', 'bg-slate-700');
+                }
+            }
+
+
+        }
+
+        function init() {
+            const tpc = document.getElementById('totalPatientCount');
+            if(tpc && typeof patientsList !== 'undefined') tpc.innerText = patientsList.length;
+            if(typeof updateRewardsUI === 'function') updateRewardsUI();
+            renderPlayerView();
+            updateROMGauge();
+        }
+
+
+        // --- TRIAGING AGENT & TELEMETRY ---
+        function analyzeTelemetry() {
+            state.triageTickets = []; // reset
+            
+            Object.values(state.patients).forEach(patient => {
+                if (patient.history.length < 3) return;
+                
+                let flags = [];
+                let sparklineData = { pain: [], ext: [] };
+                
+                const history = patient.history.slice(-14);
+                history.forEach(d => {
+                    sparklineData.pain.push(d.pain);
+                    sparklineData.ext.push(d.extLag);
+                });
+                
+                // 1. Stagnation
+                let stagCount = 0;
+                for (let i = history.length - 1; i >= Math.max(0, history.length - 3); i--) {
+                    if (history[i].extLag > 5) stagCount++;
+                }
+                if (stagCount >= 3) flags.push("Stagnation: Extension lagging by > 5° for 3+ days.");
+                
+                // 2. Pain Spike
+                if (history.length >= 2) {
+                    const latestPain = history[history.length - 1].pain;
+                    const pastPain = history[history.length - 3] ? history[history.length - 3].pain : history[history.length - 2].pain;
+                    if (latestPain - pastPain >= 3) flags.push(`Pain Spike: Increased by ${latestPain - pastPain} points recently.`);
+                }
+                
+                // 3. Form Degradation
+                let formCount = 0;
+                for (let i = history.length - 1; i >= Math.max(0, history.length - 3); i--) {
+                    if (history[i].accuracy < 65) formCount++;
+                }
+                if (formCount >= 3) flags.push("Form Degradation: Accuracy < 65% across 3 sessions.");
+                
+                if (flags.length > 0) {
+                    const summary = `${patient.name} has triggered multiple clinical flags requiring review. ` + flags.join(" ");
+                    state.triageTickets.push({
+                        id: 'ticket_' + patient.id,
+                        patientName: patient.name,
+                        date: new Date().toLocaleDateString(),
+                        flags: flags,
+                        summary: summary,
+                        sparklineData: sparklineData
+                    });
+                }
+            });
+            
+            // Only trigger toast/roo if running inside player view and it's their ticket
+            // But for now, we just populate the global triage array for the Physio View
+        }
+        
+        window.submitSessionToPhysio = function() {
+            let activePat = state.patients[state.activePatientId || 'alex_123'];
+            if (!activePat.submissions) activePat.submissions = [];
+            
+            // The clip contains the latest recorded exercise!
+            // If they used the camera, we have a live clip. If not, fallback to a demo clip so Physio View still works!
+            let latestClip = state.dailySession.clips[state.dailySession.clips.length - 1];
+            let exerciseName = "Manual Guided Set";
+            if (!latestClip) {
+                // Determine exercise name from active session if possible, else generic
+                let act = getActiveExercises(state.currentPhase).find(e => e.id === ws.activeId);
+                exerciseName = act ? act.title : "Guided Set";
+                
+                latestClip = {
+                    title: exerciseName,
+                    url: 'phase_1_combined.mp4',
+                    timestamps: { start: 1, peak: 4, final: 8 }
+                };
+            } else {
+                exerciseName = latestClip.title;
+            }
+            let extLagGen = Math.floor(Math.random() * 5) + 1; // 1 to 5 degrees lag
+            let accuracyGen = Math.floor(Math.random() * 15) + 80; // 80 to 95% accuracy
+            let painGen = Math.floor(Math.random() * 3) + 1; // 1 to 3 pain
+            
+            activePat.submissions.unshift({
+                id: 'sub_' + Date.now(),
+                date: new Date().toLocaleDateString() + ' - ' + exerciseName,
+                clips: [latestClip]
+            });
+            
+            // Clear the clip queue so the next exercise starts fresh!
+            state.dailySession.clips = [];
+            
+            // Push dynamic telemetry!
+            if (!activePat.history) activePat.history = [];
+            activePat.history.push({
+                date: new Date().toLocaleDateString(),
+                compliance: 100, pain: painGen, extLag: extLagGen, accuracy: accuracyGen
+            });
+            
+            showToast(`Agentic Report generated for ${exerciseName}!`, "success");
+            if(typeof analyzeTelemetry === 'function') analyzeTelemetry();
+        }
+
+                window.generateTriageTicket = function(flags, summary, sparklineData) {
+            let activePat = state.patients[state.activePatientId || 'alex_123'];
+            if (!activePat.triageTickets) activePat.triageTickets = [];
+            activePat.triageTickets.unshift({
+                id: 'ticket_' + Date.now(),
+                date: new Date().toLocaleDateString(),
+                flags: flags,
+                summary: summary,
+                sparklineData: sparklineData
+            });
+            showToast("URGENT: Pre-Clinic Triage Ticket Dispatched!", "error");
+            if(document.getElementById('modalRooSpeech')) {
+                document.getElementById('modalRooSpeech').innerText = `"We noticed some changes in your movement. I've notified your physio to review your plan just to be safe!"`;
+            }
+            if(currentRole === 'physio') renderPhysioView();
+        };
+        
+        window.simulateNormalRecovery = function() {
+            let activePat = state.patients[state.activePatientId || 'alex_123'];
+            if (!activePat.history) activePat.history = [];
+            activePat.history = [];
+            for(let i=14; i>=1; i--) {
+                activePat.history.push({
+                    date: new Date(Date.now() - i*86400000).toLocaleDateString(),
+                    compliance: 100, pain: Math.max(0, 4 - Math.floor((14-i)/3)), extLag: Math.max(0, 8 - Math.floor((14-i)/2)), accuracy: 85 + (14-i)
+                });
+            }
+            showToast("Simulated 14-Day Normal Recovery (Low Risk)");
+            analyzeTelemetry();
+            if(currentRole === 'physio') renderPhysioView();
+        };
+        
+        window.simulatePainSpike = function() {
+            let activePat = state.patients[state.activePatientId || 'alex_123'];
+            if (!activePat.history) activePat.history = [];
+            activePat.history = [];
+            for(let i=14; i>=1; i--) {
+                let pain = i <= 2 ? 7 : 3;
+                let extLag = i <= 3 ? 15 : 5;
+                activePat.history.push({
+                    date: new Date(Date.now() - i*86400000).toLocaleDateString(),
+                    compliance: 90, pain: pain, extLag: extLag, accuracy: 80
+                });
+            }
+            showToast("Simulated Pain Spike & Stagnation (High Risk)", "error");
+            analyzeTelemetry();
+            if(currentRole === 'physio') renderPhysioView();
+        };
+        
+        window.simulateLowCompliance = function() {
+            let activePat = state.patients[state.activePatientId || 'alex_123'];
+            if (!activePat.history) activePat.history = [];
+            activePat.history = [];
+            for(let i=14; i>=1; i--) {
+                activePat.history.push({
+                    date: new Date(Date.now() - i*86400000).toLocaleDateString(),
+                    compliance: i%3===0 ? 0 : 50, pain: 4, extLag: 8, accuracy: 60
+                });
+            }
+            showToast("Simulated Low Compliance & Poor Form (Moderate Risk)");
+            analyzeTelemetry();
+            if(currentRole === 'physio') renderPhysioView();
+        };
+
+        function updateRewardsUI() {
+            const navTrophy = document.getElementById('navTrophyCount');
+            const navStreak = document.getElementById('navStreakCount');
+            if (navTrophy) navTrophy.innerText = state.trophies;
+            if (navStreak) navStreak.innerText = state.streak;
+            const modalTrophy = document.getElementById('modalTrophyCount');
+            const modalStreak = document.getElementById('modalStreakCount');
+            if (modalTrophy) modalTrophy.innerText = state.trophies;
+            if (modalStreak) modalStreak.innerText = state.streak;
+        }
+
+        function openRewards() {
+            updateRewardsUI();
+            const grid = document.getElementById('rewardsGrid');
+            grid.innerHTML = rewardsCatalog.map(item => {
+                const isRedeemed = state.redeemed.includes(item.id);
+                const canAfford = state.trophies >= item.price;
+                
+                let btnHtml = '';
+                if (isRedeemed) {
+                    btnHtml = `<button disabled class="w-full mt-4 bg-slate-700 text-emerald-400 py-2 rounded-lg font-bold text-sm border border-emerald-900"><i class="fa-solid fa-check mr-2"></i>Redeemed</button>`;
+                } else if (canAfford) {
+                    btnHtml = `<button onclick="redeemReward('${item.id}', ${item.price})" class="w-full mt-4 bg-indigo-600 hover:bg-indigo-500 text-white py-2 rounded-lg font-bold text-sm transition-all"><i class="fa-solid fa-unlock mr-2"></i>Redeem</button>`;
+                } else {
+                    btnHtml = `<button disabled class="w-full mt-4 bg-slate-700 text-slate-500 py-2 rounded-lg font-bold text-sm cursor-not-allowed">Need ${item.price - state.trophies} more</button>`;
+                }
+
+                return `
+                    <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 text-center shadow-lg transition-transform hover:scale-105">
+                        <div class="w-16 h-16 mx-auto bg-slate-700 rounded-full flex items-center justify-center mb-4 border border-slate-700">
+                            <i class="fa-solid ${item.icon} text-3xl ${item.color}"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-white mb-1">${item.name}</h3>
+                        <p class="text-yellow-500 font-bold"><i class="fa-solid fa-trophy mr-1 text-sm"></i>${item.price}</p>
+                        ${btnHtml}
+                    </div>
+                `;
+            }).join('');
+            document.getElementById('rewardsModal').classList.replace('hidden', 'flex');
+        }
+
+        function closeRewards() {
+            document.getElementById('rewardsModal').classList.replace('flex', 'hidden');
+        }
+
+        function redeemReward(id, price) {
+            if (state.trophies >= price) {
+                state.trophies -= price;
+                state.redeemed.push(id);
+                createConfetti();
+                openRewards(); // re-render
+                updateRewardsUI();
+            }
+        }
+
+        function handleAuth(role) {
+            let u, p, validU, validP;
+            if (role === 'player') {
+                u = document.getElementById('playerUsername').value;
+                p = document.getElementById('playerPassword').value;
+                validU = 'player1';
+                validP = 'rehab2026';
+            } else {
+                u = document.getElementById('physioUsername').value;
+                p = document.getElementById('physioPassword').value;
+                validU = 'doc_admin';
+                validP = 'physio2026';
+            }
+            
+            if (u === validU && p === validP) {
+                handleLogin(role);
+            } else {
+                showToast("Invalid User ID or Password!", "error");
+            }
+        }
+
+        function handleLogin(role) {
+            // Hide login screen
+            document.getElementById('loginView').classList.add('hidden');
+            
+            // Show main app elements
+            document.getElementById('mainNav').classList.remove('hidden');
+            document.getElementById('mainAppContent').classList.remove('hidden');
+            
+            // Initialize view based on role
+            switchRole(role);
+            
+            // Re-render UI pieces just in case
+            if(role === 'player') {
+                renderPlayerView();
+                showToast("Welcome back to RePitch!");
+            } else {
+                renderPhysioView();
+                showToast("Physio Dashboard authenticated.");
+            }
+        }
+
+        function logout() {
+            // Hide main app
+            document.getElementById('mainNav').classList.add('hidden');
+            document.getElementById('mainAppContent').classList.add('hidden');
+            
+            // Show login view
+            document.getElementById('loginView').classList.remove('hidden');
+            
+            // Kept inputs pre-filled for convenience
+            
+            showToast("Logged out securely.");
+        }
+
+        
+
+        function switchRole(role) {
+            const navStreak = document.getElementById('navStreakBadge');
+            const navTrophy = document.getElementById('navTrophyBadge');
+            
+            if (role === 'player') {
+                if (navStreak) navStreak.style.display = 'flex';
+                if (navTrophy) navTrophy.style.display = 'flex';
+                playerView.classList.replace('hidden', 'block');
+                physioView.classList.replace('block', 'hidden');
+                renderPlayerView();
+            } else {
+                if (navStreak) navStreak.style.display = 'none';
+                if (navTrophy) navTrophy.style.display = 'none';
+                playerView.classList.replace('block', 'hidden');
+                physioView.classList.replace('hidden', 'block');
+                renderPhysioView();
+            }
+        }
+
+        function switchPlayerTab(tab) {
+            const btnDash = document.getElementById('tabDashboard');
+            const btnLib = document.getElementById('tabLibrary');
+            if (tab === 'dashboard') {
+                playerDashboardSection.classList.replace('hidden', 'block');
+                playerLibrarySection.classList.replace('block', 'hidden');
+                btnDash.className = "bg-indigo-600 bg-opacity-20 text-indigo-400 border border-blue-500 px-4 py-2 rounded-lg font-bold text-sm transition-all";
+                btnLib.className = "bg-slate-800 text-slate-500 border border-slate-700 hover:text-white px-4 py-2 rounded-lg font-bold text-sm transition-all";
+            } else {
+                playerDashboardSection.classList.replace('block', 'hidden');
+                playerLibrarySection.classList.replace('hidden', 'block');
+                btnLib.className = "bg-indigo-600 bg-opacity-20 text-indigo-400 border border-blue-500 px-4 py-2 rounded-lg font-bold text-sm transition-all";
+                btnDash.className = "bg-slate-800 text-slate-500 border border-slate-700 hover:text-white px-4 py-2 rounded-lg font-bold text-sm transition-all";
+                renderLibrary(state.currentPhase);
+            }
+        }
+
+        function getActiveExercises(phaseNum) {
+            let base = phases[phaseNum].exercises.filter(ex => !state.deletedExercises.includes(ex.id));
+            let custom = state.customExercises[phaseNum] || [];
+            return [...base, ...custom].map(ex => {
+                const ov = state.protocolOverrides[ex.id] || {};
+                const note = state.notes[ex.id] || "";
+                return { ...ex, ...ov, note };
+            });
+        }
+
+        function calcExerciseTime(ex) {
+            const isEndurance = (ex.reps === 1 && ex.hold > 20);
+            if (isEndurance) {
+                return (ex.hold * ex.sets) + (TIMING.SET_REST * (ex.sets - 1));
+            }
+            const timePerRep = TIMING.LIFT + ex.hold + TIMING.RETURN + TIMING.REP_REST;
+            const timePerSet = (timePerRep * ex.reps) - TIMING.REP_REST;
+            return (timePerSet * ex.sets) + (TIMING.SET_REST * (ex.sets - 1));
+        }
+
+        function formatTime(secs) {
+            const m = Math.floor(secs / 60);
+            const s = Math.floor(secs % 60).toString().padStart(2, '0');
+            return `${m}:${s}`;
+        }
+
+        // --- PLAYER VIEW RENDER ---
+        function renderPlayerView() {
+            const phaseData = phases[state.currentPhase];
+            const badge = document.getElementById('playerPhaseBadge');
+            badge.innerHTML = `<i class="fa-solid fa-layer-group mr-2"></i>${phaseData.name}`;
+            
+            let color = phaseData.badgeColor;
+            badge.className = `bg-${color} bg-opacity-20 text-${color} px-4 py-1.5 rounded-full text-sm font-bold border border-${color} flex items-center shadow-inner`;
+            
+            document.getElementById('equipmentList').innerHTML = phaseData.equipment.map(eq => 
+                `<span class="bg-slate-700 px-3 py-1.5 rounded text-xs font-bold border border-slate-700 text-white"><i class="fa-solid fa-check text-${color} mr-1.5"></i>${eq}</span>`
+            ).join('');
+
+            const exercises = getActiveExercises(state.currentPhase);
+            document.getElementById('exerciseCount').textContent = `${exercises.length} Exercises`;
+            
+            const container = document.getElementById('exerciseContainer');
+            container.innerHTML = '';
+            
+            exercises.forEach(ex => {
+                const isComp = state.completedExercises.includes(ex.id);
+                const estTime = formatTime(calcExerciseTime(ex));
+                
+                let noteHTML = '';
+                if(ex.note) {
+                    noteHTML = `<div class="mt-3 bg-indigo-600 bg-opacity-10 border border-blue-500 border-opacity-30 p-3 rounded-lg text-sm text-blue-200">
+                        <span class="font-bold uppercase text-xs tracking-wider text-indigo-400 block mb-1"><i class="fa-solid fa-user-doctor mr-1"></i> Physio Note:</span>
+                        ${ex.note}
+                    </div>`;
+                }
+
+                const card = document.createElement('div');
+                card.className = `bg-slate-900/80 backdrop-blur-sm border border-slate-800 rounded-xl p-6 border ${isComp ? 'border-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.15)]' : 'border-slate-800'} relative overflow-hidden flex flex-col h-full transition-all`;
+                
+                card.innerHTML = `
+                    ${isComp ? '<div class="absolute top-0 right-0 bg-emerald-500 text-white text-xs font-bold px-4 py-1.5 rounded-bl-lg shadow-md z-10"><i class="fa-solid fa-check mr-1"></i> DONE</div>' : ''}
+                    <div class="flex items-start mb-4">
+                        <div class="w-16 h-16 bg-slate-800 rounded-xl p-2 mr-4 flex-shrink-0 border border-slate-700 shadow-inner">
+                            ${ex.image ? `<img src="${ex.image}" alt="${ex.title}" class="w-full h-full object-cover rounded-lg">` : (svgLibrary[ex.svg] || defaultSvg)}
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-sans tracking-tight font-bold text-white leading-tight mb-1 pr-6">${ex.title}</h3>
+                            <div class="flex flex-wrap gap-2 mt-2">
+                                <span class="bg-slate-800 text-indigo-400 text-xs font-bold px-2 py-1 rounded border border-slate-800">${ex.sets} Sets x ${ex.reps} Reps</span>
+                                <span class="bg-slate-800 text-slate-500 text-xs font-bold px-2 py-1 rounded border border-slate-800"><i class="fa-regular fa-clock mr-1"></i>${estTime}</span>
+                            </div>
+                        </div>
+                    </div>
+                    ${noteHTML}
+                    <div class="mt-auto pt-5 grid grid-cols-1 gap-2">
+                        ${ex.videoId ? `<button onclick="playVideo('${ex.videoId}', '${ex.title}')" class="bg-slate-700 hover:bg-slate-700 text-white border border-slate-700 py-3 rounded-xl font-bold text-sm transition-all flex justify-center items-center active:scale-95"><i class="fa-brands fa-youtube mr-2 text-red-500 text-lg"></i>Watch Demo</button>` : ''}
+                        <button onclick="initWorkout('${ex.id}')" class="${isComp ? 'bg-slate-700 text-slate-300 border-slate-700' : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-blue-500/20'} py-3 rounded-xl font-bold text-sm transition-all border flex justify-center items-center active:scale-95">
+                            ${isComp ? '<i class="fa-solid fa-rotate-right mr-2"></i>Repeat Guided Set' : '<i class="fa-solid fa-play mr-2"></i>Start Guided Set'}
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+            updateProgress();
+        }
+
+        function renderLibrary(phaseNum) {
+            // Update tabs
+            document.querySelectorAll('.lib-tab').forEach(btn => {
+                if (parseInt(btn.getAttribute('data-libphase')) === phaseNum) {
+                    btn.className = "lib-tab bg-indigo-600 text-white px-4 py-2 rounded font-bold text-sm transition-colors";
+                } else {
+                    btn.className = "lib-tab bg-slate-800 text-slate-500 hover:text-white border border-slate-700 px-4 py-2 rounded font-bold text-sm transition-colors";
+                }
+            });
+
+            const exercises = phases[phaseNum].exercises;
+            const container = document.getElementById('libraryContainer');
+            container.innerHTML = exercises.map(ex => `
+                <div class="bg-slate-800 rounded-xl p-4 border border-slate-800 flex items-start opacity-80 hover:opacity-100 transition-opacity">
+                    <div class="w-12 h-12 bg-slate-900/80 backdrop-blur-sm border border-slate-800 rounded p-1.5 mr-3 border border-slate-700 flex-shrink-0">
+                        ${ex.image ? `<img src="${ex.image}" alt="${ex.title}" class="w-full h-full object-cover rounded-lg">` : (svgLibrary[ex.svg] || defaultSvg)}
+                    </div>
+                    <div>
+                        <h4 class="text-white font-bold text-sm mb-1">${ex.title}</h4>
+                        <div class="text-xs font-bold text-slate-500 mb-2">Default: ${ex.sets}x${ex.reps} &middot; ${ex.hold}s hold</div>
+                        <ul class="text-xs text-slate-500 space-y-1">
+                            ${ex.desc.map(d => `<li>- ${d}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+            `).join('');
+
+            // Update Roo
+            let rooState = 'default';
+            if (state.completedExercises.length > 0 && state.completedExercises.length === getActiveExercises(state.currentPhase).length) {
+                rooState = 'completed';
+            }
+            if (state.painLogs.length > 0 && state.painLogs[state.painLogs.length - 1].level > 6) {
+                rooState = 'pain';
+            }
+            updateRooState(rooState);
+        }
+
+        function updateProgress() {
+            const exList = getActiveExercises(state.currentPhase);
+            const perc = exList.length ? Math.round((state.completedExercises.length / exList.length) * 100) : 0;
+            document.getElementById('dailyProgressText').textContent = `${perc}%`;
+            document.getElementById('dailyProgressBar').style.width = `${perc}%`;
+            if (perc === 100 && exList.length > 0) {
+                document.getElementById('dailyProgressBar').classList.add('shadow-[0_0_15px_rgba(16,185,129,1)]');
+            }
+        }
+
+        function updatePainColor() {
+            const val = document.getElementById('painSlider').value;
+            const d = document.getElementById('painValue');
+            d.textContent = val;
+            let c = 'text-emerald-500';
+            if (val > 3) c = 'text-amber-500';
+            if (val > 6) c = 'text-rose-500';
+            d.className = `font-bold text-3xl font-mono ${c}`;
+        }
+
+        function submitDailyLog() {
+            const val = parseInt(document.getElementById('painSlider').value);
+            const ext = 0;
+            const flex = 0;
+            
+            state.painLogs.push({ date: new Date().toISOString(), pain: val, ext, flex });
+            updateROMGauge();
+            
+            if (val > 6) {
+                showToast("High pain recorded. Physio alerted.", "error");
+            } else {
+                showToast("Daily log saved!");
+            }
+            
+        }
+
+        // --- PHYSIO VIEW RENDER ---
+        function generateSparkline(data, color) {
+            if(!data || data.length <= 1) return '';
+            const w = 100, h = 30;
+            const min = Math.min(...data), max = Math.max(...data);
+            const range = (max - min) || 1;
+            let pts = data.map((d, i) => {
+                let x = (i / (data.length - 1)) * w;
+                let y = h - ((d - min) / range) * (h - 4) - 2; // slight padding
+                return `${x},${y}`;
+            }).join(' ');
+            
+            return `<svg width="100" height="30" class="overflow-visible">
+                <polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>`;
+        }
+
+        function resolveTriage(id) {
+            state.triageTickets = state.triageTickets.filter(t => t.id !== id);
+            renderPhysioView();
+        }
+
+        function formatTs(s) {
+            let m = Math.floor(s / 60);
+            let sec = Math.floor(s % 60);
+            return `${m.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
+        }
+        function seekVideo(id, ts) {
+            const v = document.getElementById(id);
+            if(v) v.currentTime = ts;
+        }
+
+        function renderPhysioView() {
+            // Render Triage Feed
+            const triageFeed = document.getElementById('physioTriageFeed');
+            const triageFeedContainer = document.getElementById('physioTriageFeedContainer');
+            if (triageFeedContainer) {
+                if (state.triageTickets.length > 0) {
+                    triageFeedContainer.style.display = 'block';
+                    triageFeed.innerHTML = state.triageTickets.map(t => `
+                        <div class="bg-slate-800 border border-rose-500 border-opacity-50 p-4 rounded-xl shadow-lg relative">
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="bg-rose-500 text-white px-3 py-1 rounded text-xs font-bold uppercase tracking-wider shadow-md shadow-red-500/20">Urgent - High Risk</span>
+                                <span class="text-slate-500 text-xs font-bold">${t.date}</span>
+                            </div>
+                            <p class="text-white text-sm mb-4 leading-relaxed font-bold">${t.summary}</p>
+                            
+                            <div class="flex gap-6 mb-4 bg-slate-900/80 backdrop-blur-sm border border-slate-800 p-3 rounded-lg border border-slate-800">
+                                <div>
+                                    <div class="text-xs text-slate-500 font-bold mb-1 uppercase">Pain Trend</div>
+                                    ${generateSparkline(t.sparklineData.pain, '#ef4444')}
+                                </div>
+                                <div>
+                                    <div class="text-xs text-slate-500 font-bold mb-1 uppercase">Ext Lag Trend</div>
+                                    ${generateSparkline(t.sparklineData.ext, '#fbbf24')}
+                                </div>
+                            </div>
+                            
+                            <div class="flex flex-wrap gap-2">
+                                <button onclick="showToast('Call Scheduled!')" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-xs font-bold shadow-md transition-transform active:scale-95"><i class="fa-solid fa-phone mr-1"></i> Priority Call</button>
+                                <button onclick="showToast('Load Reduced by 25%'); resolveTriage('${t.id}')" class="bg-amber-500 hover:bg-yellow-500 text-gray-900 px-4 py-2 rounded-lg text-xs font-bold shadow-md transition-transform active:scale-95"><i class="fa-solid fa-down-long mr-1"></i> Reduce Load</button>
+                                <button onclick="resolveTriage('${t.id}')" class="bg-slate-700 hover:bg-slate-700 text-slate-300 px-4 py-2 rounded-lg text-xs font-bold transition-colors ml-auto">Dismiss</button>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    triageFeedContainer.style.display = 'none';
+                }
+            }
+            document.querySelectorAll('.phase-btn').forEach(btn => {
+                if (parseInt(btn.getAttribute('data-phase')) === state.currentPhase) {
+                    btn.className = "phase-btn bg-indigo-600 text-white border-blue-500 border-2 py-3 rounded-lg text-sm font-bold shadow-lg shadow-blue-500/30";
+                } else {
+                    btn.className = "phase-btn bg-slate-900/80 backdrop-blur-sm border border-slate-800 text-slate-500 border-slate-700 border-2 hover:border-gray-500 py-3 rounded-lg text-sm font-bold transition-all";
+                }
+            });
+
+
+            // Populate Video Submissions
+            const subFeed = document.getElementById('physioSubmissionsFeed');
+            if (subFeed) {
+                let activePat = state.patients[state.activePatientId || 'alex_123'];
+                if (activePat && activePat.submissions && activePat.submissions.length > 0) {
+                    subFeed.innerHTML = activePat.submissions.map((sub, sIdx) => `
+                        <div class="bg-slate-800 border border-slate-700 p-4 rounded-xl shadow-inner relative">
+                            <div class="flex justify-between items-center mb-3">
+                                <span class="bg-indigo-600 bg-opacity-20 text-indigo-400 px-2 py-1 rounded text-xs font-bold border border-blue-500 border-opacity-30"><i class="fa-solid fa-clipboard-check mr-1"></i> AI Report</span>
+                                <span class="text-slate-500 text-xs font-bold">${sub.date}</span>
+                            </div>
+                            
+                            <button onclick="playQuickAudit(${sIdx})" class="w-full mb-4 bg-slate-900 hover:bg-slate-700 text-white font-bold py-2 rounded-lg border border-slate-700 transition-colors text-xs flex items-center justify-center shadow-lg">
+                                <i class="fa-solid fa-forward-step mr-2 text-indigo-400"></i> Play 10-Second Quick Audit (Peak Holds)
+                            </button>
+                            
+                            <div class="grid grid-cols-1 gap-4">
+                                ${sub.clips.map((c, cIdx) => {
+                                    let ts = c.timestamps || {start: 0, peak: 1, final: 2};
+                                    let vId = `physVid_${sIdx}_${cIdx}`;
+                                    return `
+                                    <div class="bg-slate-950 rounded-lg p-2 border border-slate-800 flex flex-col md:flex-row gap-3">
+                                        <div class="w-full md:w-1/2 relative group">
+                                            <div class="absolute top-1 left-1 bg-slate-800 bg-opacity-70 text-[10px] text-slate-500 font-bold uppercase px-1 rounded z-10">${c.title}</div>
+                                            <video id="${vId}" src="${c.url}" controls class="w-full rounded h-32 object-contain bg-slate-900"></video>
+                                        </div>
+                                        <div class="w-full md:w-1/2 flex flex-col justify-center space-y-2">
+                                            <button onclick="seekVideo('${vId}', ${ts.start})" class="bg-slate-900 hover:bg-slate-700 text-slate-300 text-[10px] font-bold py-1.5 px-2 rounded border border-slate-700 flex justify-between items-center transition-colors">
+                                                <span><i class="fa-regular fa-clock text-blue-500 mr-1"></i> First Rep Form</span>
+                                                <span class="text-slate-500">${formatTs(ts.start)}</span>
+                                            </button>
+                                            <button onclick="seekVideo('${vId}', ${ts.peak})" class="bg-slate-900 hover:bg-slate-700 text-slate-300 text-[10px] font-bold py-1.5 px-2 rounded border border-slate-700 flex justify-between items-center transition-colors">
+                                                <span><i class="fa-solid fa-stopwatch text-amber-500 mr-1"></i> Peak Hold Effort</span>
+                                                <span class="text-slate-500">${formatTs(ts.peak)}</span>
+                                            </button>
+                                            <button onclick="seekVideo('${vId}', ${ts.final})" class="bg-slate-900 hover:bg-slate-700 text-slate-300 text-[10px] font-bold py-1.5 px-2 rounded border border-slate-700 flex justify-between items-center transition-colors">
+                                                <span><i class="fa-solid fa-flag-checkered text-emerald-500 mr-1"></i> Final Rep / Fatigue</span>
+                                                <span class="text-slate-500">${formatTs(ts.final)}</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                `}).join('')}
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    subFeed.innerHTML = `<div class="text-slate-500 text-sm text-center py-4 italic font-bold">No recent video reports.</div>`;
+                }
+            }
+
+            // Populate Daily Activity Log
+            const logContainer = document.getElementById('physioActivityLog');
+            if (logContainer) {
+                logContainer.innerHTML = '';
+                if (state.completedExercises.length === 0) {
+                    logContainer.innerHTML = `<li class="text-slate-500 text-sm text-center py-4 italic font-bold">No exercises completed yet today.</li>`;
+                } else {
+                    state.completedExercises.forEach(exId => {
+                        const ex = Object.values(phases).flatMap(p => p.exercises).find(e => e.id === exId);
+                        if (ex) {
+                            const li = document.createElement('li');
+                            li.className = "flex items-start justify-between border-b border-slate-800 pb-3 last:border-0 last:pb-0";
+                            li.innerHTML = `
+                                <div class="flex items-start">
+                                    <div class="w-8 h-8 rounded-full bg-emerald-500 bg-opacity-20 text-emerald-500 flex items-center justify-center mr-3 flex-shrink-0 mt-0.5">
+                                        <i class="fa-solid fa-check text-sm"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-white font-bold text-sm">${ex.title}</p>
+                                        <p class="text-slate-500 text-xs mt-1">Target Angle Hit: ${ex.targetAngle}° • ${ex.sets} Sets x ${ex.reps} Reps</p>
+                                    </div>
+                                </div>
+                                <span class="text-xs text-emerald-500 font-bold bg-slate-800 px-2 py-1 rounded border border-slate-800 shadow-inner">Completed</span>
+                            `;
+                            logContainer.appendChild(li);
+                        }
+                    });
+                }
+            }
+
+            const tbody = document.getElementById('physioExerciseTable');
+            tbody.innerHTML = '';
+            const exercises = getActiveExercises(state.currentPhase);
+            
+            exercises.forEach((ex) => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-700 transition-colors';
+                tr.innerHTML = `
+                    <td class="p-4 text-white font-bold text-sm">
+                        ${ex.title}
+                        <div class="text-xs text-slate-500 mt-1 font-normal">${ex.warning}</div>
+                    </td>
+                    <td class="p-4 text-center"><input type="number" id="sets_${ex.id}" value="${ex.sets}" class="w-16 bg-slate-900/80 backdrop-blur-sm border border-slate-800 border border-slate-700 rounded text-center text-white py-1.5 focus:border-blue-500 outline-none font-mono"></td>
+                    <td class="p-4 text-center"><input type="number" id="reps_${ex.id}" value="${ex.reps}" class="w-16 bg-slate-900/80 backdrop-blur-sm border border-slate-800 border border-slate-700 rounded text-center text-white py-1.5 focus:border-blue-500 outline-none font-mono"></td>
+                    <td class="p-4 text-center"><input type="number" id="hold_${ex.id}" value="${ex.hold}" class="w-16 bg-slate-900/80 backdrop-blur-sm border border-slate-800 border border-slate-700 rounded text-center text-white py-1.5 focus:border-blue-500 outline-none font-mono"></td>
+                    <td class="p-4"><input type="text" id="note_${ex.id}" value="${ex.note}" placeholder="Add instructions..." class="w-full bg-slate-900/80 backdrop-blur-sm border border-slate-800 border border-slate-700 rounded text-white py-1.5 px-3 focus:border-blue-500 outline-none text-sm"></td>
+                    <td class="p-4 text-center">
+                        <button onclick="deleteExercise('${ex.id}')" class="text-slate-500 hover:text-rose-500 transition-colors" title="Remove Exercise">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+            
+            const addTr = document.createElement('tr');
+            addTr.className = 'bg-slate-800 border-t-2 border-slate-800';
+            addTr.innerHTML = `
+                <td class="p-4"><input type="text" id="newExTitle" placeholder="New Exercise Title..." class="w-full bg-slate-900/80 backdrop-blur-sm border border-slate-800 border border-slate-700 rounded text-white py-1.5 px-3 focus:border-emerald-500 outline-none text-sm font-bold"></td>
+                <td class="p-4 text-center"><input type="number" id="newExSets" value="3" class="w-16 bg-slate-900/80 backdrop-blur-sm border border-slate-800 border border-slate-700 rounded text-center text-white py-1.5 focus:border-emerald-500 outline-none font-mono"></td>
+                <td class="p-4 text-center"><input type="number" id="newExReps" value="10" class="w-16 bg-slate-900/80 backdrop-blur-sm border border-slate-800 border border-slate-700 rounded text-center text-white py-1.5 focus:border-emerald-500 outline-none font-mono"></td>
+                <td class="p-4 text-center"><input type="number" id="newExHold" value="2" class="w-16 bg-slate-900/80 backdrop-blur-sm border border-slate-800 border border-slate-700 rounded text-center text-white py-1.5 focus:border-emerald-500 outline-none font-mono"></td>
+                <td class="p-4"><input type="text" id="newExNote" placeholder="Instructions (Optional)" class="w-full bg-slate-900/80 backdrop-blur-sm border border-slate-800 border border-slate-700 rounded text-white py-1.5 px-3 focus:border-emerald-500 outline-none text-sm"></td>
+                <td class="p-4 text-center">
+                    <button onclick="addCustomExercise()" class="bg-emerald-500 hover:bg-emerald-600 text-white rounded p-1.5 transition-colors" title="Add Exercise">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(addTr);
+            
+            renderRedFlags();
+            updateROMGauge();
+        }
+
+        function setPhase(p) {
+            state.currentPhase = p;
+            state.completedExercises = [];
+            state.protocolOverrides = {};
+            state.notes = {};
+            renderPhysioView();
+            showToast(`Protocol updated to Phase ${p}.`, "success");
+        }
+
+        function deleteExercise(id) {
+            state.deletedExercises.push(id);
+            saveProtocolChanges(); // save existing inputs before re-render
+            renderPhysioView();
+            showToast("Exercise removed from protocol.", "warning");
+        }
+
+        function addCustomExercise() {
+            const title = document.getElementById('newExTitle').value.trim();
+            if (!title) {
+                showToast("Please enter an exercise title.", "error");
+                return;
+            }
+            const sets = parseInt(document.getElementById('newExSets').value) || 3;
+            const reps = parseInt(document.getElementById('newExReps').value) || 10;
+            const hold = parseInt(document.getElementById('newExHold').value) || 2;
+            const note = document.getElementById('newExNote').value.trim();
+            
+            if (!state.customExercises[state.currentPhase]) {
+                state.customExercises[state.currentPhase] = [];
+            }
+            
+            const newEx = {
+                id: 'c_' + Date.now(),
+                title: title,
+                sets: sets,
+                reps: reps,
+                hold: hold,
+                desc: [],
+                warning: "",
+                svg: "knee", // default icon
+                note: note
+            };
+            
+            state.customExercises[state.currentPhase].push(newEx);
+            
+            saveProtocolChanges(); // save existing inputs
+            renderPhysioView();
+            showToast("Custom exercise added successfully!");
+        }
+
+        function saveProtocolChanges() {
+            const exercises = getActiveExercises(state.currentPhase);
+            exercises.forEach(ex => {
+                const s = parseInt(document.getElementById(`sets_${ex.id}`).value) || ex.sets;
+                const r = parseInt(document.getElementById(`reps_${ex.id}`).value) || ex.reps;
+                const h = parseInt(document.getElementById(`hold_${ex.id}`).value) || ex.hold;
+                const note = document.getElementById(`note_${ex.id}`).value.trim();
+                
+                if (s !== ex.sets || r !== ex.reps || h !== ex.hold) {
+                    state.protocolOverrides[ex.id] = { sets:s, reps:r, hold:h };
+                } else {
+                    delete state.protocolOverrides[ex.id];
+                }
+                if (note) state.notes[ex.id] = note; else delete state.notes[ex.id];
+            });
+            showToast("Adjustments pushed to Player View.");
+        }
+
+        function renderRedFlags() {
+            const list = document.getElementById('redFlagList');
+            const flags = state.painLogs.filter(l => l.pain >= 6);
+            if (!flags.length) {
+                list.innerHTML = '<div class="text-xs text-slate-500 font-bold text-center mt-4 bg-slate-800 py-3 rounded-lg border border-slate-800">No recent alerts.</div>';
+                return;
+            }
+            list.innerHTML = flags.reverse().map(f => {
+                const d = new Date(f.date).toLocaleDateString(undefined, {month:'short', day:'numeric'});
+                return `
+                <div class="bg-rose-500 bg-opacity-10 border border-rose-500 border-opacity-30 rounded-lg p-3 relative overflow-hidden group">
+                    <div class="absolute left-0 top-0 bottom-0 w-1 bg-rose-500"></div>
+                    <div class="flex justify-between items-center mb-1 pl-2">
+                        <span class="text-xs font-bold text-slate-500">${d}</span>
+                        <span class="bg-rose-500 text-white text-xs font-bold px-2 py-0.5 rounded shadow-sm">Pain ${f.pain}/10</span>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+
+        const patientsList = [
+            { id: 'p1', name: 'Alex (Amateur Winger)', postOp: '14 Days Post-Op', graft: 'Patellar', initials: 'AL' },
+            { id: 'p2', name: 'Marcus (Striker)', postOp: '6 Weeks Post-Op', graft: 'Hamstring', initials: 'MA' },
+            { id: 'p3', name: 'James (Defender)', postOp: '3 Months Post-Op', graft: 'Quad', initials: 'JA' },
+            { id: 'p4', name: 'Sam (Midfielder)', postOp: '5 Days Post-Op', graft: 'Allograft', initials: 'SA' }
+        ];
+
+        function filterPatients() {
+            const input = document.getElementById('patientSearchInput').value.toLowerCase();
+            const results = document.getElementById('patientSearchResults');
+            
+            if (!input) {
+                results.classList.add('hidden');
+                return;
+            }
+
+            const filtered = patientsList.filter(p => p.name.toLowerCase().includes(input));
+            
+            if (filtered.length === 0) {
+                results.innerHTML = `<div class="p-3 text-sm text-slate-500 text-center">No patients found.</div>`;
+            } else {
+                results.innerHTML = filtered.map(p => `
+                    <div onclick="selectPatient('${p.id}')" class="p-3 hover:bg-slate-700 cursor-pointer border-b border-slate-800 last:border-none flex items-center transition-colors">
+                        <div class="w-8 h-8 bg-slate-700 text-slate-300 rounded-full flex items-center justify-center text-xs font-bold mr-3">${p.initials}</div>
+                        <div>
+                            <div class="text-white font-bold text-sm">${p.name}</div>
+                            <div class="text-xs text-slate-500">${p.postOp}</div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            results.classList.remove('hidden');
+        }
+
+        function selectPatient(id) {
+            const p = patientsList.find(x => x.id === id);
+            if (p) {
+                document.getElementById('activePatientInitials').innerText = p.initials;
+                document.getElementById('activePatientName').innerText = p.name;
+                document.getElementById('activePatientStats').innerHTML = `<i class="fa-regular fa-calendar-check mr-1"></i>${p.postOp} (Graft: ${p.graft})`;
+                
+                document.getElementById('patientSearchInput').value = '';
+                document.getElementById('patientSearchResults').classList.add('hidden');
+                
+                // Show a quick toast
+                showToast(`Switched active patient to ${p.name}`);
+                
+                // If this was a real app, we'd fetch their state and re-render the physio dashboard here.
+            }
+        }
+
+
+        function viewAllPatients() {
+            const grid = document.getElementById('allPatientsGrid');
+            grid.innerHTML = patientsList.map(p => `
+                <div onclick="selectPatient('${p.id}'); closePatientsModal();" class="bg-slate-800 border border-slate-700 hover:border-blue-500 rounded-xl p-4 cursor-pointer transition-all flex items-center shadow-md group">
+                    <div class="w-12 h-12 bg-slate-700 group-hover:bg-indigo-600 text-slate-500 group-hover:text-white rounded-full flex items-center justify-center font-bold text-lg mr-4 transition-colors border border-slate-700">${p.initials}</div>
+                    <div>
+                        <h3 class="text-white font-bold group-hover:text-indigo-400 transition-colors">${p.name}</h3>
+                        <p class="text-xs text-slate-500 mt-1"><i class="fa-regular fa-calendar-check mr-1 text-emerald-500"></i>${p.postOp}</p>
+                        <p class="text-xs text-slate-500 mt-0.5"><i class="fa-solid fa-bone mr-1"></i>Graft: ${p.graft}</p>
+                    </div>
+                </div>
+            `).join('');
+            document.getElementById('patientsModal').classList.replace('hidden', 'flex');
+        }
+
+        function closePatientsModal() {
+            document.getElementById('patientsModal').classList.replace('flex', 'hidden');
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            const results = document.getElementById('patientSearchResults');
+            const searchInput = document.getElementById('patientSearchInput');
+            if (results && !results.contains(e.target) && e.target !== searchInput) {
+                results.classList.add('hidden');
+            }
+        });
+
+        function updateROMGauge() {
+            // Find latest log with flex/ext
+            const logs = state.painLogs.filter(l => l.flex > 0);
+            if (!logs.length) return;
+            const latest = logs[logs.length-1];
+            
+            if(document.getElementById('flexDisplay')) {
+                document.getElementById('extDisplay').textContent = `${latest.ext}°`;
+                document.getElementById('flexDisplay').textContent = `${latest.flex}°`;
+                
+                // SVG arc is 125 dash length total. 140 deg is target max flexion.
+                const perc = Math.min(latest.flex / 140, 1);
+                const offset = 125 - (125 * perc);
+                document.getElementById('romFlexionArc').style.strokeDashoffset = offset;
+            }
+        }
+
+        // --- STRICT WORKOUT INTERVAL ENGINE ---
+        let ws = {
+            activeId: null, ex: null,
+            isRunning: false, interval: null,
+            set: 1, rep: 1, phase: '', // 'LIFT', 'HOLD', 'RETURN', 'REST'
+            timeLeft: 0, elapsed: 0, total: 0
+        };
+
+        function initAudio() {
+            if(!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if(audioCtx.state === 'suspended') audioCtx.resume();
+        }
+
+        function playSound(type) {
+            if(!audioCtx) return;
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain); gain.connect(audioCtx.destination);
+                const t = audioCtx.currentTime;
+                
+                if (type === 'up') {
+                    osc.type = 'sine'; osc.frequency.setValueAtTime(600, t);
+                    gain.gain.setValueAtTime(0.1, t);
+                    osc.start(); osc.stop(t+0.2);
+                } else if (type === 'hold') {
+                    osc.type = 'square'; osc.frequency.setValueAtTime(400, t);
+                    gain.gain.setValueAtTime(0.05, t);
+                    osc.start(); osc.stop(t+0.5);
+                } else if (type === 'down') {
+                    osc.type = 'sine'; osc.frequency.setValueAtTime(300, t);
+                    gain.gain.setValueAtTime(0.1, t);
+                    osc.start(); osc.stop(t+0.2);
+                } else if (type === 'rest') {
+                    osc.type = 'triangle'; osc.frequency.setValueAtTime(800, t);
+                    gain.gain.setValueAtTime(0.1, t);
+                    osc.frequency.exponentialRampToValueAtTime(400, t+0.5);
+                    osc.start(); osc.stop(t+0.5);
+                } else if (type === 'done') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(440, t);
+                    osc.frequency.setValueAtTime(660, t+0.2);
+                    osc.frequency.setValueAtTime(880, t+0.4);
+                    gain.gain.setValueAtTime(0.2, t);
+                    osc.start(); osc.stop(t+0.8);
+                }
+            } catch(e){}
+        }
+
+        function initWorkout(exId) {
+            ws.ex = getActiveExercises(state.currentPhase).find(e => e.id === exId);
+            ws.activeId = exId;
+            ws.total = calcExerciseTime(ws.ex);
+            ws.elapsed = 0; ws.set = 1; ws.rep = 1; ws.phase = 'READY'; ws.timeLeft = 0;
+            ws.isRunning = false;
+            
+            document.getElementById('modalExTitle').textContent = ws.ex.title;
+            document.getElementById('modalExDetails').innerHTML = `${ws.ex.sets} Set(s) &times; ${ws.ex.reps} Rep(s)`;
+            document.getElementById('modalExTime').innerHTML = `<i class="fa-regular fa-clock mr-1"></i>Est: ${formatTime(ws.total)}`;
+            
+            document.getElementById('btnStartTimer').innerHTML = '<i class="fa-solid fa-play mr-2"></i> Start Guided Set';
+            document.getElementById('btnStartTimer').className = 'bg-indigo-600 hover:bg-indigo-500 text-white py-4 rounded-xl font-bold transition-all shadow-lg shadow-blue-500/30 text-lg flex justify-center items-center w-full active:scale-95';
+            
+            document.getElementById('btnCompleteEx').disabled = true;
+            document.getElementById('btnCompleteEx').className = 'bg-slate-700 text-gray-600 py-4 rounded-xl font-bold cursor-not-allowed border border-slate-700 text-lg flex justify-center items-center w-full transition-all';
+            document.getElementById('btnCompleteEx').innerHTML = '<i class="fa-solid fa-lock mr-2"></i> Must Complete';
+            
+            updateWorkoutUI();
+            document.getElementById('workoutModal').classList.remove('hidden');
+            document.getElementById('workoutModal').classList.add('flex');
+        }
+
+        function toggleWorkoutTimer() {
+            initAudio();
+            const btn = document.getElementById('btnStartTimer');
+            if (ws.isRunning) {
+                clearInterval(ws.interval); ws.isRunning = false;
+                btn.innerHTML = '<i class="fa-solid fa-play mr-2"></i> Resume';
+                btn.className = 'bg-amber-500 hover:bg-yellow-500 text-gray-900 py-4 rounded-xl font-bold transition-all shadow-lg shadow-yellow-500/30 text-lg flex justify-center items-center w-full active:scale-95';
+            } else {
+                if (ws.phase === 'READY') {
+                    ws.phase = 'LIFT';
+                    ws.timeLeft = TIMING.LIFT;
+                    playSound('up');
+                }
+                ws.isRunning = true;
+                btn.innerHTML = '<i class="fa-solid fa-pause mr-2"></i> Pause';
+                btn.className = 'bg-slate-700 hover:bg-slate-600 text-white py-4 rounded-xl font-bold transition-all text-lg flex justify-center items-center w-full active:scale-95';
+                
+                ws.interval = setInterval(() => {
+                    ws.timeLeft--; ws.elapsed++;
+                    if (ws.timeLeft <= 0) advanceWorkoutPhase();
+                    updateWorkoutUI();
+                }, 1000);
+            }
+        }
+
+        function advanceWorkoutPhase() {
+            const isEndurance = (ws.ex.reps === 1 && ws.ex.hold > 20);
+            
+            if (isEndurance) {
+                if (ws.phase === 'LIFT') {
+                    ws.phase = 'HOLD'; ws.timeLeft = ws.ex.hold; playSound('hold');
+                } else if (ws.phase === 'HOLD') {
+                    if (ws.set < ws.ex.sets) {
+                        ws.phase = 'REST'; ws.timeLeft = TIMING.SET_REST; playSound('rest');
+                    } else {
+                        finishWorkout();
+                    }
+                } else if (ws.phase === 'REST') {
+                    ws.set++; ws.phase = 'HOLD'; ws.timeLeft = ws.ex.hold; playSound('hold');
+                }
+                return;
+            }
+
+            // Normal Reps
+            if (ws.phase === 'LIFT') {
+                ws.phase = 'HOLD'; ws.timeLeft = ws.ex.hold; 
+                if(ws.ex.hold > 0) playSound('hold');
+            } else if (ws.phase === 'HOLD') {
+                ws.phase = 'RETURN'; ws.timeLeft = TIMING.RETURN; playSound('down');
+            } else if (ws.phase === 'RETURN') {
+                if (ws.rep < ws.ex.reps) {
+                    ws.phase = 'REST'; ws.timeLeft = TIMING.REP_REST;
+                } else if (ws.set < ws.ex.sets) {
+                    ws.phase = 'REST'; ws.timeLeft = TIMING.SET_REST; playSound('rest');
+                } else {
+                    finishWorkout(); return;
+                }
+            } else if (ws.phase === 'REST') {
+                if (ws.rep < ws.ex.reps) {
+                    ws.rep++; ws.phase = 'LIFT'; ws.timeLeft = TIMING.LIFT; playSound('up');
+                } else {
+                    ws.set++; ws.rep = 1; ws.phase = 'LIFT'; ws.timeLeft = TIMING.LIFT; playSound('up');
+                }
+            }
+        }
+
+        function updateWorkoutUI() {
+            document.getElementById('wsSet').innerHTML = `${ws.set} <span class="text-sm text-gray-600">/ ${ws.ex.sets}</span>`;
+            document.getElementById('wsRep').innerHTML = `${ws.rep} <span class="text-sm text-gray-600">/ ${ws.ex.reps}</span>`;
+            
+            let pText = "READY"; let pColor = "text-slate-500"; let strokeColor = "#4b5563";
+            if (ws.phase === 'LIFT') { pText = "LIFT / PUSH"; pColor = "text-indigo-400"; strokeColor = "#3b82f6"; }
+            else if (ws.phase === 'HOLD') { pText = "HOLD"; pColor = "text-amber-500"; strokeColor = "#fbbf24"; }
+            else if (ws.phase === 'RETURN') { pText = "RETURN / DOWN"; pColor = "text-emerald-500"; strokeColor = "#10b981"; }
+            else if (ws.phase === 'REST') { pText = "REST"; pColor = "text-slate-500"; strokeColor = "#9ca3af"; }
+            else if (ws.phase === 'DONE') { pText = "COMPLETED!"; pColor = "text-emerald-500"; strokeColor = "#10b981"; }
+            
+            document.getElementById('wsActionText').className = `text-xl font-bold tracking-widest uppercase transition-colors ${pColor}`;
+            document.getElementById('wsActionText').textContent = pText;
+            document.getElementById('wsPhaseTime').textContent = Math.max(0, ws.timeLeft);
+            
+            const circle = document.getElementById('timerCircle');
+            circle.style.stroke = strokeColor;
+            
+            let phaseTotal = 0;
+            if(ws.phase === 'LIFT') phaseTotal = TIMING.LIFT;
+            else if(ws.phase === 'HOLD') phaseTotal = ws.ex.hold;
+            else if(ws.phase === 'RETURN') phaseTotal = TIMING.RETURN;
+            else if(ws.phase === 'REST') phaseTotal = (ws.rep === ws.ex.reps) ? TIMING.SET_REST : TIMING.REP_REST;
+            
+            if (phaseTotal > 0 && ws.timeLeft > 0) {
+                const perc = (ws.timeLeft / phaseTotal) * 100;
+                circle.setAttribute('stroke-dasharray', `${perc}, 100`);
+            } else {
+                circle.setAttribute('stroke-dasharray', '0, 100');
+            }
+            
+            if(ws.phase === 'DONE') circle.setAttribute('stroke-dasharray', '100, 100');
+
+            const percTotal = Math.min((ws.elapsed / ws.total) * 100, 100);
+            document.getElementById('wsTotalTime').textContent = `${formatTime(ws.elapsed)} / ${formatTime(ws.total)}`;
+            document.getElementById('wsTotalProgress').style.width = `${percTotal}%`;
+        }
+
+        function finishWorkout() {
+            ws.phase = 'DONE'; ws.timeLeft = 0;
+            clearInterval(ws.interval); ws.isRunning = false;
+            playSound('done');
+            updateWorkoutUI();
+            
+            document.getElementById('btnStartTimer').classList.add('hidden');
+            const btnComplete = document.getElementById('btnCompleteEx');
+            btnComplete.disabled = false;
+            btnComplete.className = 'bg-emerald-500 hover:bg-emerald-600 text-white py-4 rounded-xl font-bold shadow-[0_0_20px_rgba(16,185,129,0.5)] text-lg flex justify-center items-center w-full transition-all active:scale-95';
+            btnComplete.innerHTML = '<i class="fa-solid fa-check mr-2"></i> Mark Completed';
+        }
+
+// abortWorkout delegated to window.abortWorkout
+
+
+
+
+        function startDailyRoutine() {
+            const phaseExs = getActiveExercises(state.currentPhase);
+            const uncompleted = phaseExs.filter(ex => !state.completedExercises.includes(ex.id));
+            if (uncompleted.length === 0) {
+                showToast("You have already completed all exercises for today!");
+                return;
+            }
+            initWorkout(uncompleted[0].id);
+        }
+
+        function completeWorkout() {
+            if (!state.completedExercises.includes(ws.activeId)) {
+                state.completedExercises.push(ws.activeId);
+                state.trophies += 50; // Reward for completing!
+                
+                // Check if all exercises are done to increment streak
+                const phaseExs = getActiveExercises(state.currentPhase);
+                if (state.completedExercises.length >= phaseExs.length && !state.streakCompletedToday) {
+                    state.streak += 1;
+                    state.streakCompletedToday = true;
+                    state.trophies += 100; // Bonus for full day completion
+                }
+            }
+            if (window.abortWorkout) window.abortWorkout();
+            renderPlayerView();
+            if(typeof updateRewardsUI === 'function') updateRewardsUI();
+            if(typeof createConfetti === 'function') createConfetti();
+            showToast("Exercise protocol executed! +50 Trophies 🏆");
+            
+            // AGENTIC WORKFLOW: Auto-dispatch to physio after every exercise
+            if(typeof submitSessionToPhysio === 'function') submitSessionToPhysio();
+            
+            // Auto-advance or finish Routine
+            const phaseExs = getActiveExercises(state.currentPhase);
+            const uncompleted = phaseExs.filter(ex => !state.completedExercises.includes(ex.id));
+            
+            if (uncompleted.length > 0) {
+                // Next exercise
+                initWorkout(uncompleted[0].id);
+            } else {
+                // All done! Show AI Report Modal
+                showDailyReportModal();
+            }
+        }
+
+        // --- Toasts ---
+        let tTimeout;
+        function showToast(msg, type = "success") {
+            clearTimeout(tTimeout);
+            const t = document.getElementById('toast');
+            document.getElementById('toastMessage').textContent = msg;
+            
+            if (type === "error") {
+                t.className = "fixed top-24 right-4 bg-rose-500 text-white px-6 py-4 rounded-xl shadow-2xl transform transition-transform duration-300 z-50 flex items-center space-x-3 font-bold border border-red-500";
+                t.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-xl"></i><span id="toastMessage">' + msg + '</span>';
+            } else {
+                t.className = "fixed top-24 right-4 bg-emerald-500 text-white px-6 py-4 rounded-xl shadow-2xl transform transition-transform duration-300 z-50 flex items-center space-x-3 font-bold border border-emerald-500";
+                t.innerHTML = '<i class="fa-solid fa-check-circle text-xl"></i><span id="toastMessage">' + msg + '</span>';
+            }
+            
+            t.classList.remove('translate-x-full');
+            tTimeout = setTimeout(() => t.classList.add('translate-x-full'), 3000);
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+
+<!-- Rewards Store Modal -->
+<div id="rewardsModal" class="fixed inset-0 bg-slate-950 bg-opacity-90 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900/80 backdrop-blur-sm border border-slate-800 w-full max-w-4xl rounded-3xl p-8 border border-slate-800 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+        <button onclick="closeRewards()" class="absolute top-6 right-6 text-slate-500 hover:text-white transition-colors">
+            <i class="fa-solid fa-times text-2xl"></i>
+        </button>
+        
+        <div class="text-center mb-8">
+            <h2 class="text-3xl font-sans tracking-tight font-bold text-white mb-2">Rewards Center 🏆</h2>
+            <p class="text-slate-500">Redeem your hard-earned trophies for real football gear.</p>
+            <div class="mt-4 inline-flex items-center space-x-6 bg-slate-800 px-6 py-3 rounded-xl border border-slate-800 shadow-inner">
+                <div class="text-xl font-bold text-yellow-500"><i class="fa-solid fa-trophy mr-2"></i><span id="modalTrophyCount">0</span> Balance</div>
+                <div class="w-px h-6 bg-slate-700"></div>
+                <div class="text-xl font-bold text-orange-500"><i class="fa-solid fa-fire mr-2"></i><span id="modalStreakCount">0</span> Streak</div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6" id="rewardsGrid">
+            <!-- Populated by JS -->
+        </div>
+    </div>
+</div>
+
+<!-- Patients Roster Modal -->
+<div id="patientsModal" class="fixed inset-0 bg-slate-950 bg-opacity-90 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900/80 backdrop-blur-sm border border-slate-800 w-full max-w-3xl rounded-3xl p-8 border border-slate-800 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+        <button onclick="closePatientsModal()" class="absolute top-6 right-6 text-slate-500 hover:text-white transition-colors">
+            <i class="fa-solid fa-times text-2xl"></i>
+        </button>
+        
+        <div class="mb-6 border-b border-slate-800 pb-4">
+            <h2 class="text-2xl font-sans tracking-tight font-bold text-white flex items-center"><i class="fa-solid fa-users text-indigo-400 mr-3"></i>Patient Roster</h2>
+            <p class="text-slate-500 mt-1">Select any patient below to load their rehab profile.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="allPatientsGrid">
+            <!-- Populated by JS -->
+        </div>
+    </div>
+</div>
+
+<!-- Video Modal -->
+<div id="videoModal" class="fixed inset-0 bg-slate-950 bg-opacity-90 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-slate-800 w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden border border-slate-700">
+        <div class="p-4 border-b border-slate-800 flex justify-between items-center">
+            <h2 id="videoModalTitle" class="text-xl font-sans tracking-tight font-bold text-white">Exercise Demo</h2>
+            <button onclick="closeVideoModal()" class="text-slate-500 hover:text-white transition-colors">
+                <i class="fa-solid fa-xmark text-2xl"></i>
+            </button>
+        </div>
+        <div class="relative w-full" style="padding-top: 56.25%;">
+            <iframe id="videoIframe" class="absolute inset-0 w-full h-full" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- MEDIAPIPE POSE MATCHING ENGINE OVERRIDES   -->
+<!-- ========================================== -->
+<script>
+    let aiPose = null;
+    let aiCamera = null;
+    let isTracking = false;
+    let activeEx = null;
+    let repPhase = 'START'; // 'START' or 'TARGET'
+    let holdStartTime = null;
+    let currentRecordingStartTime = null;
+    let currentTimestamps = { start: null, peak: null, final: null, maxHold: 0 };
+
+    // We overwrite initWorkout
+    window.initWorkout = function(exId) {
+        activeEx = Object.values(phases).flatMap(p => p.exercises).find(e => e.id === exId);
+        if(!activeEx) return;
+        
+        ws.activeId = exId;
+        ws.set = 1; 
+        ws.rep = 0;
+        repPhase = 'START';
+        
+        // Reset HUD
+        document.getElementById('modalExTitle').innerText = activeEx.title;
+        document.getElementById('wsSet').innerHTML = `1 <span class="text-sm text-gray-600">/ ${activeEx.sets || 3}</span>`;
+        document.getElementById('wsRep').innerHTML = `0 <span class="text-base text-slate-500">/ ${activeEx.reps || 10}</span>`;
+        document.getElementById('hudTargetAngle').innerText = (activeEx.targetAngle || 175) + '°';
+        document.getElementById('hudLiveAngle').innerText = '--°';
+        document.getElementById('modalRooSpeech').innerText = `"Ready? Click Enable Camera!"`;
+        
+        // Demo
+        if(activeEx.videoId) {
+            const st = activeEx.vidStart || 20;
+            const en = activeEx.vidEnd || 25;
+            document.getElementById('demoIframe').src = `https://www.youtube.com/embed/${activeEx.videoId}?autoplay=1&mute=1&controls=0&start=${st}&end=${en}&loop=1&playlist=${activeEx.videoId}`;
+        }
+        
+        document.getElementById('workoutModal').classList.replace('hidden', 'flex');
+        document.getElementById('cameraLoadingOverlay').classList.remove('hidden');
+        document.getElementById('btnStartTracking').classList.remove('hidden');
+        document.getElementById('btnCompleteEx').classList.add('hidden');
+        document.getElementById('repProgressBarContainer').classList.add('hidden');
+        
+        // Initialize MediaPipe if not done
+        if (!aiPose && window.Pose) {
+            aiPose = new Pose({
+                locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`
+            });
+            aiPose.setOptions({
+                modelComplexity: 1,
+                smoothLandmarks: true,
+                enableSegmentation: false,
+                minDetectionConfidence: 0.5,
+                minTrackingConfidence: 0.5
+            });
+            aiPose.onResults(onPoseResults);
+        }
+    };
+
+    window.startRecording = function() {
+        if(state.mediaRecorder && state.mediaRecorder.state === 'inactive') {
+            state.recordedChunks = [];
+            currentRecordingStartTime = Date.now();
+            currentTimestamps = { start: null, peak: null, final: null, maxHold: 0 };
+            state.mediaRecorder.start();
+            document.getElementById('btnRecStart').classList.add('hidden');
+            document.getElementById('btnRecPause').classList.remove('hidden');
+            document.getElementById('btnRecStop').classList.remove('hidden');
+            document.getElementById('modalRooSpeech').innerText = `"Recording... Maintain form!"`;
+        }
+    };
+    
+    window.pauseRecording = function() {
+        if(state.mediaRecorder && state.mediaRecorder.state === 'recording') {
+            state.mediaRecorder.pause();
+            document.getElementById('btnRecPause').classList.add('hidden');
+            document.getElementById('btnRecResume').classList.remove('hidden');
+        }
+    };
+
+    window.resumeRecording = function() {
+        if(state.mediaRecorder && state.mediaRecorder.state === 'paused') {
+            state.mediaRecorder.resume();
+            document.getElementById('btnRecResume').classList.add('hidden');
+            document.getElementById('btnRecPause').classList.remove('hidden');
+        }
+    };
+
+    window.stopRecording = function() {
+        if(state.mediaRecorder && state.mediaRecorder.state !== 'inactive') {
+            state.mediaRecorder.stop();
+            document.getElementById('btnRecPause').classList.add('hidden');
+            document.getElementById('btnRecResume').classList.add('hidden');
+            document.getElementById('btnRecStop').classList.add('hidden');
+            document.getElementById('btnRecRetake').classList.remove('hidden');
+            document.getElementById('btnCompleteEx').classList.remove('hidden');
+            document.getElementById('btnCompleteEx').innerHTML = '<i class="fa-solid fa-check-double mr-2"></i> Save Clip & Continue';
+            document.getElementById('btnCompleteEx').classList.remove('bg-slate-700', 'text-slate-500');
+            document.getElementById('btnCompleteEx').classList.add('bg-emerald-500', 'text-white', 'shadow-lg', 'shadow-emerald-500/30');
+            document.getElementById('modalRooSpeech').innerText = `"Great job! Save it or retake."`;
+        }
+    };
+
+    window.retakeRecording = function() {
+        state.recordedChunks = [];
+        document.getElementById('btnRecRetake').classList.add('hidden');
+        document.getElementById('btnRecStart').classList.remove('hidden');
+        document.getElementById('btnCompleteEx').classList.add('hidden');
+        document.getElementById('modalRooSpeech').innerText = `"Ready for take 2! Hit Record!"`;
+    };
+
+    window.abortWorkout = function() {
+        if (aiCamera) { aiCamera.stop(); }
+        isTracking = false;
+        document.getElementById('workoutModal').classList.add('hidden');
+        document.getElementById('demoIframe').src = "";
+    };
+
+    window.startTracking = async function() {
+        if (!aiPose && window.Pose) {
+            aiPose = new Pose({
+                locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`
+            });
+            aiPose.setOptions({
+                modelComplexity: 1,
+                smoothLandmarks: true,
+                enableSegmentation: false,
+                minDetectionConfidence: 0.5,
+                minTrackingConfidence: 0.5
+            });
+            aiPose.onResults(onPoseResults);
+        }
+
+        if (!aiPose) {
+            alert("MediaPipe failed to load. Using fallback.");
+            document.getElementById('btnCompleteEx').classList.remove('hidden');
+            return;
+        }
+        
+        const videoElement = document.getElementById('webcamVideo');
+        document.getElementById('modalRooSpeech').innerText = `"Requesting camera access..."`;
+        
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            videoElement.srcObject = stream;
+            
+            // Wait for video to start playing before we start tracking
+            await new Promise((resolve) => {
+                videoElement.onloadedmetadata = () => {
+                    videoElement.play();
+                    resolve();
+                };
+            });
+            
+            isTracking = true;
+            
+            // Custom render loop replacing @mediapipe/camera_utils
+            async function renderLoop() {
+                if(isTracking && !videoElement.paused && !videoElement.ended) {
+                    await aiPose.send({image: videoElement});
+                }
+                if(isTracking) {
+                    requestAnimationFrame(renderLoop);
+                }
+            }
+            renderLoop();
+            document.getElementById('cameraLoadingOverlay').classList.add('hidden');
+            document.getElementById('btnStartTracking').classList.add('hidden');
+            document.getElementById('btnCompleteEx').classList.add('hidden');
+            document.getElementById('repProgressBarContainer').classList.add('hidden');
+            document.getElementById('recordingControls').classList.remove('hidden');
+            document.getElementById('modalRooSpeech').innerText = `"Camera active! Hit Record!"`;
+            
+            // Set up MediaRecorder
+            const stream = videoElement.srcObject;
+            if (stream) {
+                state.mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+                state.mediaRecorder.ondataavailable = (e) => {
+                    if (e.data.size > 0) state.recordedChunks.push(e.data);
+                };
+                state.mediaRecorder.onstop = () => {
+                    const blob = new Blob(state.recordedChunks, { type: 'video/webm' });
+                    const url = URL.createObjectURL(blob);
+                    if(currentTimestamps.start === null) currentTimestamps.start = 0;
+                    if(currentTimestamps.peak === null) currentTimestamps.peak = 1;
+                    if(currentTimestamps.final === null) currentTimestamps.final = 2;
+                    state.dailySession.clips.push({ 
+                        id: activeEx.id, title: activeEx.title, url: url, 
+                        timestamps: { ...currentTimestamps }
+                    });
+                };
+            }
+            
+        } catch (e) {
+            console.error(e);
+            document.getElementById('modalRooSpeech').innerText = `"Camera denied. Use manual complete."`;
+            document.getElementById('btnCompleteEx').classList.remove('hidden');
+        }
+    };
+
+    function calculateAngle(a, b, c) {
+        // Calculate Euclidean angle between 3 points
+        const radians = Math.atan2(c.y - b.y, c.x - b.x) - Math.atan2(a.y - b.y, a.x - b.x);
+        let angle = Math.abs(radians * 180.0 / Math.PI);
+        if (angle > 180.0) angle = 360 - angle;
+        return angle;
+    }
+
+    function onPoseResults(results) {
+        if (!isTracking || !activeEx) return;
+        
+        const canvas = document.getElementById('poseCanvas');
+        const ctx = canvas.getContext('2d');
+        const video = document.getElementById('webcamVideo');
+        
+        // Match canvas size to video
+        if (canvas.width !== video.videoWidth) {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+        }
+        
+        ctx.save();
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Draw video frame on canvas (mirrored)
+        ctx.translate(canvas.width, 0);
+        ctx.scale(-1, 1);
+        ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
+        
+        if (results.poseLandmarks) {
+            // Draw full skeleton
+            drawConnectors(ctx, results.poseLandmarks, POSE_CONNECTIONS, {color: '#ffffff', lineWidth: 2});
+            drawLandmarks(ctx, results.poseLandmarks, {color: '#3b82f6', lineWidth: 1, radius: 3});
+            
+            // Dynamically select tracking joints based on exercise config
+            const jointType = activeEx.trackingJoint || 'knee';
+            let ptA, ptB, ptC, trackingNode;
+            
+            if (jointType === 'hip') {
+                // Right Hip tracking: Shoulder (12), Hip (24), Knee (26)
+                ptA = results.poseLandmarks[12];
+                ptB = results.poseLandmarks[24];
+                ptC = results.poseLandmarks[26];
+                trackingNode = ptB;
+            } else {
+                // Right Knee tracking: Hip (24), Knee (26), Ankle (28)
+                ptA = results.poseLandmarks[24];
+                ptB = results.poseLandmarks[26];
+                ptC = results.poseLandmarks[28];
+                trackingNode = ptB;
+            }
+            
+            if (ptA && ptB && ptC && ptA.visibility > 0.5 && ptB.visibility > 0.5 && ptC.visibility > 0.5) {
+                const angle = calculateAngle(ptA, ptB, ptC);
+                document.getElementById('hudLiveAngle').innerText = Math.round(angle) + '°';
+                
+                // State Machine & Anti-Cheat
+                const target = activeEx.targetAngle || 175;
+                
+                // Adjust tolerance: if target is full extension (180), tolerance should cover 170-180.
+                // If target is 135, tolerance can be +/- 12 degrees.
+                const tolerance = (target >= 175) ? 10 : 15;
+                
+                // Color the tracking joint based on tolerance
+                const isMatching = Math.abs(angle - target) <= tolerance || (target === 180 && angle >= 170 && angle <= 190);
+                
+                ctx.fillStyle = isMatching ? '#10b981' : '#ef4444'; // Green or Red
+                ctx.beginPath();
+                ctx.arc(trackingNode.x * canvas.width, trackingNode.y * canvas.height, 10, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = '#ffffff';
+                ctx.stroke();
+                
+                
+                processRepLogic(angle, target, tolerance);
+            } else {
+                document.getElementById('hudLiveAngle').innerText = 'Step back';
+            }
+        }
+        ctx.restore();
+    }
+
+    function processRepLogic(angle, target, tolerance) {
+        const isMatching = Math.abs(angle - target) <= tolerance;
+        const pBar = document.getElementById('repProgressBarContainer');
+        const pFill = document.getElementById('repProgressBar');
+        
+        if (repPhase === 'START') {
+            // Check if they moved far enough away from target to reset (e.g. back to flexion)
+            if (Math.abs(angle - target) > 30) {
+                document.getElementById('modalRooSpeech').innerText = `"Good reset! Now push to ${target}°!"`;
+                repPhase = 'PUSHING';
+            }
+        } 
+        else if (repPhase === 'PUSHING') {
+            if (isMatching) {
+                repPhase = 'TARGET';
+                holdStartTime = Date.now();
+                if (currentRecordingStartTime && currentTimestamps.start === null) {
+                    currentTimestamps.start = Math.floor((Date.now() - currentRecordingStartTime) / 1000);
+                }
+                document.getElementById('modalRooSpeech').innerText = `"Perfect angle! Hold it there!"`;
+                pBar.classList.remove('hidden');
+            }
+        }
+        else if (repPhase === 'TARGET') {
+            if (isMatching) {
+                const holdTime = (Date.now() - holdStartTime) / 1000;
+                const reqHold = activeEx.hold || 3;
+                pFill.style.width = Math.min((holdTime / reqHold) * 100, 100) + '%';
+                
+                if (holdTime >= reqHold) {
+                    if (currentRecordingStartTime) {
+                        currentTimestamps.final = Math.floor((Date.now() - currentRecordingStartTime) / 1000);
+                        if (currentTimestamps.peak === null) {
+                            currentTimestamps.peak = Math.floor((holdStartTime - currentRecordingStartTime) / 1000);
+                        }
+                    }
+                    // Rep Complete!
+                    ws.rep++;
+                    document.getElementById('wsRep').innerHTML = `${ws.rep} <span class="text-base text-slate-500">/ ${activeEx.reps}</span>`;
+                    document.getElementById('modalRooSpeech').innerText = `"Great rep! Reset and go again!"`;
+                    repPhase = 'START';
+                    pBar.classList.add('hidden');
+                    pFill.style.width = '0%';
+                    
+                    if (typeof createConfetti === 'function') createConfetti();
+                    
+                    if (ws.rep >= activeEx.reps) {
+                        ws.set++;
+                        ws.rep = 0;
+                        if (ws.set > activeEx.sets) {
+                            completeWorkout();
+                        } else {
+                            document.getElementById('wsSet').innerHTML = `${ws.set} <span class="text-sm text-gray-600">/ ${activeEx.sets}</span>`;
+                            document.getElementById('modalRooSpeech').innerText = `"Set complete! Take a breather."`;
+                        }
+                    }
+                }
+            } else {
+                // Form broke before hold time finished
+                document.getElementById('modalRooSpeech').innerText = `"Form broke! Get back to ${target}°!"`;
+                pFill.style.width = '0%';
+                repPhase = 'PUSHING';
+            }
+        }
+    }
+</script>
+
+    <!-- Daily AI Report Modal -->
+    <div id="dailyReportModal" class="fixed inset-0 bg-slate-950 bg-opacity-90 z-[60] hidden flex-col items-center justify-center p-4">
+        <div class="bg-slate-900/80 backdrop-blur-sm border border-slate-800 w-full max-w-4xl rounded-3xl p-8 border border-slate-800 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <button onclick="document.getElementById('dailyReportModal').classList.replace('flex', 'hidden')" class="absolute top-6 right-6 text-slate-500 hover:text-white transition-colors">
+                <i class="fa-solid fa-times text-2xl"></i>
+            </button>
+            <div class="flex items-center mb-6">
+                <div class="w-16 h-16 bg-indigo-600 bg-opacity-20 text-indigo-400 rounded-full flex items-center justify-center text-3xl mr-4 border border-blue-500 border-opacity-30">
+                    <i class="fa-solid fa-clipboard-check"></i>
+                </div>
+                <div>
+                    <h2 class="text-3xl font-sans tracking-tight font-bold text-white">Daily Cumulative AI Report</h2>
+                    <p class="text-slate-500">Auto-generated session summary ready for dispatch.</p>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div class="bg-slate-800 border border-slate-700 p-5 rounded-2xl">
+                    <h3 class="text-slate-500 font-bold text-xs uppercase tracking-wider mb-4">Telemetry Overview</h3>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-white font-bold"><i class="fa-solid fa-check-circle text-emerald-500 mr-2"></i> Session Compliance</span>
+                            <span class="text-2xl font-bold text-emerald-500">100%</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-white font-bold"><i class="fa-solid fa-bullseye text-indigo-400 mr-2"></i> Form Accuracy (Avg)</span>
+                            <span class="text-2xl font-bold text-indigo-400">88%</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-white font-bold"><i class="fa-solid fa-ruler text-amber-500 mr-2"></i> Extension Lag (Max)</span>
+                            <span class="text-xl font-bold text-amber-500">3°</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-slate-800 border border-slate-700 p-5 rounded-2xl overflow-y-auto max-h-64" id="dailyReportClips">
+                    <h3 class="text-slate-500 font-bold text-xs uppercase tracking-wider mb-4">Recorded Video Clips</h3>
+                    <!-- Clips injected via JS -->
+                </div>
+            </div>
+            
+            <!-- Auto-dispatched by Agentic Workflow -->
+        </div>
+    </div>
+
+    
+    <!-- Telemetry Simulation Panel -->
+    <div class="fixed bottom-4 left-4 z-[100] bg-slate-900 border border-slate-700 rounded-xl shadow-2xl p-4 max-w-sm">
+        <div class="flex justify-between items-center mb-2 border-b border-slate-800 pb-1">
+            <h4 class="text-white font-bold text-xs uppercase">Tester Simulation Controls</h4>
+            <button onclick="toggleSimPanel()" class="text-slate-400 hover:text-white transition-colors">
+                <i id="simToggleIcon" class="fa-solid fa-chevron-down"></i>
+            </button>
+        </div>
+        <div id="simControlsContent" class="flex flex-col space-y-2">
+            <button onclick="simulateNormalRecovery()" class="bg-emerald-500 bg-opacity-20 text-emerald-500 hover:bg-opacity-30 border border-emerald-500 border-opacity-30 px-3 py-1.5 rounded text-xs font-bold transition-colors">
+                <i class="fa-solid fa-arrow-trend-up mr-1"></i> Simulate Normal (Low Risk)
+            </button>
+            <button onclick="simulateLowCompliance()" class="bg-amber-500 bg-opacity-20 text-amber-500 hover:bg-opacity-30 border border-amber-500 border-opacity-30 px-3 py-1.5 rounded text-xs font-bold transition-colors">
+                <i class="fa-solid fa-battery-quarter mr-1"></i> Simulate Low Comp (Mod Risk)
+            </button>
+            <button onclick="simulatePainSpike()" class="bg-red-500 bg-opacity-20 text-red-500 hover:bg-opacity-30 border border-red-500 border-opacity-30 px-3 py-1.5 rounded text-xs font-bold transition-colors">
+                <i class="fa-solid fa-triangle-exclamation mr-1"></i> Simulate Pain Spike (High Risk)
+            </button>
+        </div>
+    </div>
+
+    <script>
+        window.toggleSimPanel = function() {
+            const content = document.getElementById('simControlsContent');
+            const icon = document.getElementById('simToggleIcon');
+            if (content.classList.contains('hidden')) {
+                content.classList.remove('hidden');
+                icon.className = 'fa-solid fa-chevron-down';
+            } else {
+                content.classList.add('hidden');
+                icon.className = 'fa-solid fa-chevron-up';
+            }
+        };
+    </script>
+
+    <script>
+        window.toggleSimPanel = function() {
+            const content = document.getElementById('simControlsContent');
+            const icon = document.getElementById('simToggleIcon');
+            if (content.classList.contains('hidden')) {
+                content.classList.remove('hidden');
+                icon.className = 'fa-solid fa-chevron-down';
+            } else {
+                content.classList.add('hidden');
+                icon.className = 'fa-solid fa-chevron-up';
+            }
+        };
+    </script>
+</body></html>
