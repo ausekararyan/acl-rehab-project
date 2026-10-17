@@ -6,7 +6,7 @@ An interactive, AI-assisted ACL Rehabilitation Portal designed for guided patien
 
 ## 🚀 Overview
 
-This repository contains the standalone **Interactive Prototype / Portal** (`acl-rehab-portal.html` / `index.html`) featuring:
+This repository contains the standalone **Interactive Prototype / Portal** (`index.html` / `acl-rehab-portal.html`) featuring:
 - **Patient Dashboard & Guided Exercise Sets**: 1 Set, 1 Rep recovery protocol with real-time pose guidance and audio cues.
 - **Computer Vision Posture Tracking**: Uses MediaPipe Pose engine for joint angle tracking (knee extension, hip flexion) directly in the browser via webcam.
 - **Smart Video Highlight Clipper**: Synchronized 10-second highlight reel demonstrating all 4 Phase 1 recovery exercises (Quad Sets, SLR, Heel Slides, Patellar Mobilizations).
@@ -21,6 +21,8 @@ This repository contains the standalone **Interactive Prototype / Portal** (`acl
 acl-rehab-project/
 ├── index.html                           # Main entrypoint (GitHub Pages ready)
 ├── acl-rehab-portal.html                # Interactive portal prototype
+├── server.js                            # Zero-dependency local dev server
+├── package.json                         # npm run dev / npm start scripts
 ├── phase_1_combined.mp4                 # 10-second highlight video of Phase 1 exercises
 ├── exercise_quad_sets_1787543982867.jpg # Exercise reference: Quad Sets
 ├── exercise_slr_1787543996071.jpg       # Exercise reference: Straight Leg Raise
@@ -36,19 +38,22 @@ acl-rehab-project/
 
 ## 💻 How to Run Locally
 
-### Option 1: Direct File
-Simply open `index.html` or `acl-rehab-portal.html` in any modern web browser (Google Chrome or Microsoft Edge recommended for webcam/MediaPipe features).
-
-### Option 2: Local HTTP Server (Recommended)
-Run Python's built-in web server:
-
+### Option 1: Standard Node / npm (Recommended)
 ```bash
-# From within the repository directory
+npm run dev
+# or
+npm start
+```
+Then visit **[http://localhost:3000](http://localhost:3000)**.
+
+### Option 2: Direct Python Server
+```bash
 python3 -m http.server 8080
 ```
+Then visit **[http://localhost:8080](http://localhost:8080)**.
 
-Then visit:
-- **[http://localhost:8080](http://localhost:8080)** or **[http://localhost:8080/acl-rehab-portal.html](http://localhost:8080/acl-rehab-portal.html)**
+### Option 3: Direct File
+Simply open `index.html` in Google Chrome or Microsoft Edge.
 
 ---
 

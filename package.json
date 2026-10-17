@@ -1,0 +1,20 @@
+{
+  "name": "acl-rehab-project",
+  "version": "1.0.0",
+  "description": "Interactive ACL Rehabilitation Portal Prototype with Video Reports and Guided Sets",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "acl",
+    "rehabilitation",
+    "mediapipe",
+    "telemetry",
+    "video-reports",
+    "guided-sets"
+  ],
+  "author": "Aryan Ausekar",
+  "license": "MIT"
+}
